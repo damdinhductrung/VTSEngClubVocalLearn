@@ -5,6 +5,8 @@
  */
 package vtsengclubvocallearn;
 
+import connection.MyConnection;
+
 /**
  *
  * @author Trung
@@ -15,7 +17,7 @@ public class VTSEngClubVocalLearn {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        System.out.println(MyConnection.getConnection().toString());
     }
     
 }

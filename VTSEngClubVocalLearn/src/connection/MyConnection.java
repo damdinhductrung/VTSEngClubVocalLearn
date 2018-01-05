@@ -15,8 +15,9 @@ import java.sql.DriverManager;
 public class MyConnection {
     public static Connection getConnection(){
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            return DriverManager.getConnection("jdbc:sqlserver://localhost:1433;database=Tecknic", "sa", "password");
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/VTSEngClubVocalLearn", "root", "password");
+            return conn;
         } catch (Exception e) {
         }
         return null;
