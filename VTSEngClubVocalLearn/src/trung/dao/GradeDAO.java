@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import trung.dto.GradeDTO;
 
 /**
  *
@@ -36,16 +37,19 @@ public class GradeDAO {
         }
     }
     
-    public ArrayList getAllGrade() {
-        ArrayList grade = new ArrayList();
+    public ArrayList<GradeDTO> getAllGrade() {
+        ArrayList<GradeDTO> result = new ArrayList<>();
         
         try {
             conn = MyConnection.getConnection();
-            String sql = "Select SEQ from Grade";
+            String sql = "Select SEQ, Number from Grade";
             pre = conn.prepareCall(sql);
             rs = pre.executeQuery();
             while (rs.next()) {
-                grade.add(rs.getString("SEQ"));
+                GradeDTO dto = new GradeDTO();
+                dto.setSEQ(rs.getInt("SEQ"));
+                dto.setNumber(rs.getInt("Number"));
+                result.add(dto);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -53,6 +57,37 @@ public class GradeDAO {
             closeConnection();
         }
         
-        return grade;
+        System.out.println("----GET ALL GRADE----");
+        return result;
     }
+    
+    /**
+     * Lấy info của Grade bằng số SEQ
+     * @param gradeSEQ: Số SEQ của grade muốn xem info
+     * @return GradeDTO
+     */
+    public GradeDTO getGradeInfoBySEQ(int gradeSEQ) {
+        GradeDTO result = new GradeDTO();
+        
+        try {
+            conn = MyConnection.getConnection();
+            String sql = "Select Number from Grade where SEQ = ?";
+            pre = conn.prepareCall(sql);
+            pre.setInt(1, gradeSEQ);
+            rs = pre.executeQuery();
+            if (rs.next()) {
+                result.setSEQ(gradeSEQ);
+                result.setNumber(rs.getInt("Number"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        
+        System.out.println("----GET GRADE SEQ " + gradeSEQ + " INFO----");
+        return result;
+    }
+    
+    
 }

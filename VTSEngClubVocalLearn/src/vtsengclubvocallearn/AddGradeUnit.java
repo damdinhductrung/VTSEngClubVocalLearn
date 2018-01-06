@@ -5,10 +5,14 @@
  */
 package vtsengclubvocallearn;
 
-import java.awt.List;
+import java.awt.Color;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import trung.dao.GradeDAO;
+import trung.dao.UnitDAO;
+import trung.dto.GradeDTO;
+import trung.dto.UnitDTO;
+import util.MyUtil;
 
 /**
  *
@@ -16,21 +20,65 @@ import trung.dao.GradeDAO;
  */
 public class AddGradeUnit extends javax.swing.JFrame {
     GradeDAO gradeDao = new GradeDAO();
+    UnitDAO unitDao = new UnitDAO();
+    DefaultListModel gradeModel = new DefaultListModel();
+    DefaultListModel unitModel = new DefaultListModel();
+    ArrayList<GradeDTO> grades = new ArrayList<>();
+    ArrayList<UnitDTO> units = new ArrayList<>();
     /**
      * Creates new form AddGradeUnit
      */
     public AddGradeUnit() {
         initComponents();
+        jlGrade.setModel(gradeModel);
+        jlUnit.setModel(unitModel);
         loadGrade();
     }
     
     public void loadGrade() {
-        DefaultListModel model = new DefaultListModel();
-        jlGrade.setModel(model);
-        ArrayList grades = gradeDao.getAllGrade();
-        for (Object item : grades) {
-            model.addElement(item);
+        grades = gradeDao.getAllGrade();
+        for (GradeDTO dto : grades) {
+            gradeModel.addElement(dto.getNumber());
         }
+        jlGrade.setSelectedIndex(0);
+        loadUnitByGradeSEQ(grades.get(jlGrade.getSelectedIndex()).getSEQ());
+        loadGradeInfoByGradeSEQ(grades.get(0).getSEQ());
+    } 
+    
+    public void loadGradeInfoByGradeSEQ(int gradeSEQ) {
+        GradeDTO dto =  gradeDao.getGradeInfoBySEQ(gradeSEQ);
+        txtGradeNumber.setText("" + dto.getNumber());
+    }
+    
+    public void loadUnitInfoByUnitSEQ(int unitSEQ) {
+        UnitDTO dto = unitDao.getUnitInfoBySEQ(unitSEQ);
+        txtUnitNumber.setText("" + dto.getNumber());
+        txtUnitName.setText(dto.getName());
+    }
+    
+    public void loadUnitByGradeSEQ(int gradeSEQ) {
+        unitModel.removeAllElements();
+        units = unitDao.getAllUnitByGradeSEQ(gradeSEQ);
+        for (UnitDTO dto : units) {
+            unitModel.addElement("Unit " + dto.getNumber() + ": " + dto.getName());
+        }
+    }
+    
+    public boolean createUnitByGradeSEQ(int unitNumber, String unitName, int gradeSEQ) {
+        UnitDTO dto = new UnitDTO();
+        dto.setNumber(unitNumber);
+        dto.setName(txtUnitName.getText());
+
+        return unitDao.createUnitByGradeSEQ(dto, gradeSEQ);
+    }
+    
+    public boolean updateUnitByUnitSEQ(int unitNumber, String unitName, int SEQ) {
+        UnitDTO dto = new UnitDTO();
+        dto.setNumber(unitNumber);
+        dto.setName(txtUnitName.getText());
+        dto.setSEQ(SEQ);
+
+        return unitDao.updateUnitByUnitSEQ(dto);
     }
 
     /**
@@ -44,17 +92,143 @@ public class AddGradeUnit extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jlGrade = new javax.swing.JList<>();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jlUnit = new javax.swing.JList<>();
+        jPanel2 = new javax.swing.JPanel();
+        txtUnitNumber = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        btnUnitSave = new javax.swing.JButton();
+        btnUnitDelete = new javax.swing.JButton();
+        btnUnitUpdate = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        txtUnitName = new javax.swing.JTextField();
+        btnUnitNew = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        txtGradeNumber = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("VTSEngClub - Create Grade");
+        setBackground(new java.awt.Color(255, 255, 255));
 
+        jlGrade.setBorder(javax.swing.BorderFactory.createTitledBorder("Grade"));
         jlGrade.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
         jlGrade.setName("jlGrade"); // NOI18N
+        jlGrade.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jlGradeMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jlGrade);
+
+        jlUnit.setBorder(javax.swing.BorderFactory.createTitledBorder("Unit"));
+        jlUnit.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jlUnit.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jlUnitFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jlUnitFocusLost(evt);
+            }
+        });
+        jlUnit.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jlUnitMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(jlUnit);
+
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Unit"));
+
+        jLabel2.setText("Number");
+
+        btnUnitSave.setText("Save");
+        btnUnitSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUnitSaveActionPerformed(evt);
+            }
+        });
+
+        btnUnitDelete.setText("Delete");
+
+        btnUnitUpdate.setText("Update");
+        btnUnitUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUnitUpdateActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setText("Name");
+
+        btnUnitNew.setText("New");
+        btnUnitNew.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUnitNewActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Grade");
+
+        txtGradeNumber.setEditable(false);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(btnUnitNew)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnUnitSave)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnUnitUpdate)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnUnitDelete))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtGradeNumber)
+                            .addComponent(txtUnitNumber)
+                            .addComponent(txtUnitName))))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(txtGradeNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtUnitNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtUnitName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnUnitNew)
+                    .addComponent(btnUnitSave)
+                    .addComponent(btnUnitUpdate)
+                    .addComponent(btnUnitDelete))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -62,19 +236,103 @@ public class AddGradeUnit extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(301, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jlGradeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jlGradeMouseClicked
+        int gradeSEQ = grades.get(jlGrade.getSelectedIndex()).getSEQ();
+        loadGradeInfoByGradeSEQ(gradeSEQ);
+        loadUnitByGradeSEQ(gradeSEQ);
+    }//GEN-LAST:event_jlGradeMouseClicked
+
+    private void jlUnitMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jlUnitMouseClicked
+        int unitSEQ = units.get(jlUnit.getSelectedIndex()).getSEQ();
+        loadUnitInfoByUnitSEQ(unitSEQ);
+    }//GEN-LAST:event_jlUnitMouseClicked
+
+    private void btnUnitSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUnitSaveActionPerformed
+        if (!MyUtil.isNumber(txtUnitNumber.getText()) && txtUnitName.getText().isEmpty()) {
+            txtUnitNumber.setBackground(Color.red);
+            txtUnitName.setBackground(Color.red);
+        } else if (!MyUtil.isNumber(txtUnitNumber.getText())) {
+            txtUnitNumber.setBackground(Color.red);
+            txtUnitName.setBackground(Color.white);
+        }else if (txtUnitName.getText().isEmpty()) {
+            txtUnitNumber.setBackground(Color.white);
+            txtUnitName.setBackground(Color.red);
+        }else if (unitDao.isHaveNumber(Integer.parseInt(txtUnitNumber.getText()), grades.get(jlGrade.getSelectedIndex()).getSEQ())) {
+            txtUnitNumber.setBackground(Color.red);
+            txtUnitName.setBackground(Color.white);
+        } else {
+            txtUnitNumber.setBackground(Color.white);
+            txtUnitName.setBackground(Color.white);
+
+            int unitNumber = Integer.parseInt(txtUnitNumber.getText());
+            int gradeSEQ = grades.get(jlGrade.getSelectedIndex()).getSEQ();
+            createUnitByGradeSEQ(unitNumber, txtUnitName.getText(), gradeSEQ);
+            
+            loadUnitByGradeSEQ(gradeSEQ);
+        }
+    }//GEN-LAST:event_btnUnitSaveActionPerformed
+
+    private void btnUnitNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUnitNewActionPerformed
+        txtUnitNumber.setText("");
+        txtUnitName.setText("");
+    }//GEN-LAST:event_btnUnitNewActionPerformed
+
+    private void jlUnitFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jlUnitFocusGained
+        btnUnitDelete.setEnabled(true);
+    }//GEN-LAST:event_jlUnitFocusGained
+
+    private void jlUnitFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jlUnitFocusLost
+        btnUnitDelete.setEnabled(false);
+    }//GEN-LAST:event_jlUnitFocusLost
+
+    private void btnUnitUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUnitUpdateActionPerformed
+        if (!MyUtil.isNumber(txtUnitNumber.getText()) && txtUnitName.getText().isEmpty()) {
+            txtUnitNumber.setBackground(Color.red);
+            txtUnitName.setBackground(Color.red);
+        } else if (!MyUtil.isNumber(txtUnitNumber.getText())) {
+            txtUnitNumber.setBackground(Color.red);
+            txtUnitName.setBackground(Color.white);
+        }else if (txtUnitName.getText().isEmpty()) {
+            txtUnitNumber.setBackground(Color.white);
+            txtUnitName.setBackground(Color.red);
+        }else if (!unitDao.isHaveNumber(Integer.parseInt(txtUnitNumber.getText()), grades.get(jlGrade.getSelectedIndex()).getSEQ())) {
+            txtUnitNumber.setBackground(Color.red);
+            txtUnitName.setBackground(Color.white);
+        } else {
+            txtUnitNumber.setBackground(Color.white);
+            txtUnitName.setBackground(Color.white);
+
+            int unitNumber = Integer.parseInt(txtUnitNumber.getText());
+            int SEQ = grades.get(jlGrade.getSelectedIndex()).getSEQ();
+            
+            updateUnitByUnitSEQ(unitNumber, txtUnitName.getText(), SEQ);
+            
+            loadUnitByGradeSEQ(grades.get(jlGrade.getSelectedIndex()).getSEQ());
+        }
+    }//GEN-LAST:event_btnUnitUpdateActionPerformed
 
     /**
      * @param args the command line arguments
@@ -114,7 +372,20 @@ public class AddGradeUnit extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnUnitDelete;
+    private javax.swing.JButton btnUnitNew;
+    private javax.swing.JButton btnUnitSave;
+    private javax.swing.JButton btnUnitUpdate;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JList<String> jlGrade;
+    private javax.swing.JList<String> jlUnit;
+    private javax.swing.JTextField txtGradeNumber;
+    private javax.swing.JTextField txtUnitName;
+    private javax.swing.JTextField txtUnitNumber;
     // End of variables declaration//GEN-END:variables
 }
