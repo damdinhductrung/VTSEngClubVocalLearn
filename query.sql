@@ -21,3 +21,4 @@ INSERT INTO `vtsengclubvocallearn`.`unit` (`Number`, `Name`, `Grade_SEQ`) VALUES
 INSERT INTO `vtsengclubvocallearn`.`unit` (`Number`, `Name`, `Grade_SEQ`) VALUES ('15', 'Countries', '1');
 INSERT INTO `vtsengclubvocallearn`.`unit` (`Number`, `Name`, `Grade_SEQ`) VALUES ('16', 'Man and the environment', '1');
 SELECT * FROM vtsengclubvocallearn.unit;
+
