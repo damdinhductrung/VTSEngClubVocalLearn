@@ -7,6 +7,8 @@ package vtsengclubvocallearn;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import javax.swing.JOptionPane;
 
 /**
@@ -14,14 +16,19 @@ import javax.swing.JOptionPane;
  * @author Trung
  */
 public class Dictionary extends javax.swing.JFrame {
-    AddWord addWordForm = new AddWord();
+    final JFXPanel fxPanel = new JFXPanel();
+
     /**
      * Creates new form Dictionary
      */
     public Dictionary() {
         initComponents();
         
-        
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+            }
+        });
     }
 
     /**
@@ -147,12 +154,17 @@ public class Dictionary extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNewWordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewWordActionPerformed
-        switch (JOptionPane.showConfirmDialog(this, addWordForm, "VTS Add new word" ,JOptionPane.OK_CANCEL_OPTION)) {
+        AddWord addWordForm = new AddWord();
+        addWordForm.startup();
+        switch (JOptionPane.showConfirmDialog(this, addWordForm, "VTS Add new word", JOptionPane.OK_CANCEL_OPTION)) {
             case 0:
                 System.out.println(addWordForm.getInfo().getName());
                 break;
+
         }
         
+        
+        addWordForm.stopSound();
     }//GEN-LAST:event_btnNewWordActionPerformed
 
     /**
@@ -188,6 +200,7 @@ public class Dictionary extends javax.swing.JFrame {
                 new Dictionary().setVisible(true);
             }
         });
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

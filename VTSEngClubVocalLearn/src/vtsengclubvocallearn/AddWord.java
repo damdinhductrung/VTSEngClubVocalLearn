@@ -5,7 +5,21 @@
  */
 package vtsengclubvocallearn;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileView;
 import trung.dto.WordDTO;
 
@@ -14,41 +28,84 @@ import trung.dto.WordDTO;
  * @author Trung
  */
 public class AddWord extends javax.swing.JPanel {
+
+    File music;
+    Media media;
+    MediaPlayer mediaPlayer;
+
     /**
      * Creates new form AddWord
      */
     public AddWord() {
         initComponents();
-        fcSound.setFileView(new FileView() {
-            
-});
+
+        fcImage.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "png"));
+        fcSound.setFileFilter(new FileNameExtensionFilter("Sound files", "MP3", "wav"));
+
+        music = new File("D:\\music.mp3");
+        media = new Media(music.toURI().toString());
+        mediaPlayer = new MediaPlayer(media);
+
     }
-    
-    public void clearAllField() {
+
+    public void startup() {
+
         txtWord.setText("");
         txtSpelling.setText("");
         txtImageSrc.setText("");
-        txtSoundSrc.setText("");
+//        txtSoundSrc.setText("");
         taMeaning.setText("");
         cbPartsOfSpeech.setSelectedIndex(0);
     }
-    
+
     public WordDTO getInfo() {
         WordDTO result = new WordDTO();
-        
-        result.setExSoundSrc(txtSoundSrc.getText());
+
+//        result.setExSoundSrc(txtSoundSrc.getText());
         result.setExample(taExample.getText());
         result.setMeaning(taMeaning.getText());
         result.setName(txtWord.getText());
         result.setPartsOfSpeech(cbPartsOfSpeech.getSelectedItem().toString());
         result.setSpelling(txtSpelling.getText());
-        
-        
-        
+
         return result;
     }
-    
-    
+
+    private void setSound() {
+        mediaPlayer.stop();
+        btnSoundPlay.setText("Play");
+        
+        File sound = fcSound.getSelectedFile();
+        File des = new File("src\\resources\\sound\\" + sound.getName());
+        
+        lbSoundSrc.setText(sound.getName());
+
+        
+            try {
+                Files.copy(sound.toPath(), des.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                music = new File(des.getAbsolutePath());
+                media = new Media(music.toURI().toString());
+                mediaPlayer = new MediaPlayer(media);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        
+    }
+
+    public void playSound() {
+        if (mediaPlayer.getStatus() == MediaPlayer.Status.READY || mediaPlayer.getStatus() == MediaPlayer.Status.STOPPED) {
+            mediaPlayer.play();
+            btnSoundPlay.setText("Stop");
+        } else {
+            mediaPlayer.stop();
+            btnSoundPlay.setText("Play");
+        }
+    }
+
+    public void stopSound() {
+        mediaPlayer.stop();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -70,7 +127,6 @@ public class AddWord extends javax.swing.JPanel {
         jLabel12 = new javax.swing.JLabel();
         txtWord = new javax.swing.JTextField();
         txtSpelling = new javax.swing.JTextField();
-        txtSoundSrc = new javax.swing.JTextField();
         btnAddSound = new javax.swing.JButton();
         cbPartsOfSpeech = new javax.swing.JComboBox<>();
         txtImageSrc = new javax.swing.JTextField();
@@ -87,6 +143,9 @@ public class AddWord extends javax.swing.JPanel {
         jComboBox1 = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
         jComboBox2 = new javax.swing.JComboBox<>();
+        btnSoundPlay = new javax.swing.JButton();
+        lbSoundSrc = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
 
         jLabel1.setText("Word");
 
@@ -110,6 +169,11 @@ public class AddWord extends javax.swing.JPanel {
         cbPartsOfSpeech.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Noun", "Pronoun", "Adjective", "Verb", "Adverb", "Preposition", "Conjunction", "Interjection" }));
 
         btnAddImage.setText("...");
+        btnAddImage.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddImageActionPerformed(evt);
+            }
+        });
 
         taMeaning.setColumns(20);
         taMeaning.setRows(5);
@@ -120,8 +184,6 @@ public class AddWord extends javax.swing.JPanel {
         taExample.setColumns(20);
         taExample.setRows(5);
         jScrollPane1.setViewportView(taExample);
-
-        jTextField1.setText("jTextField1");
 
         jButton1.setText("...");
 
@@ -135,6 +197,24 @@ public class AddWord extends javax.swing.JPanel {
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
+        btnSoundPlay.setText("Play");
+        btnSoundPlay.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSoundPlayActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 120, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 118, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -142,40 +222,58 @@ public class AddWord extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel8)
-                    .addComponent(jLabel9)
-                    .addComponent(jLabel10)
-                    .addComponent(jLabel11)
-                    .addComponent(jLabel12)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel5))
-                .addGap(21, 21, 21)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtImageSrc, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtWord, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtSpelling, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtSoundSrc, javax.swing.GroupLayout.Alignment.LEADING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnAddSound, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnAddImage, javax.swing.GroupLayout.Alignment.TRAILING)))
-                    .addComponent(jScrollPane1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTextField1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(cbPartsOfSpeech, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel9)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel11))
+                        .addGap(21, 21, 21)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtImageSrc, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtWord, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtSpelling, javax.swing.GroupLayout.Alignment.LEADING))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnAddImage))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(cbPartsOfSpeech, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(lbSoundSrc)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnAddSound)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnSoundPlay)))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel12)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5))
+                        .addGap(21, 21, 21)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
+                                    .addComponent(jScrollPane1)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jTextField1)
+                                        .addGap(52, 52, 52))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton1))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -192,8 +290,9 @@ public class AddWord extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(txtSoundSrc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAddSound))
+                    .addComponent(btnAddSound)
+                    .addComponent(btnSoundPlay)
+                    .addComponent(lbSoundSrc))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
@@ -203,42 +302,62 @@ public class AddWord extends javax.swing.JPanel {
                     .addComponent(jLabel11)
                     .addComponent(txtImageSrc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnAddImage))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel12)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1)
-                    .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(213, 213, 213)
+                        .addComponent(jButton1)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel12)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap())))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddSoundActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddSoundActionPerformed
         switch (fcSound.showOpenDialog(this)) {
             case JFileChooser.APPROVE_OPTION:
-                txtSoundSrc.setText(fcSound.getSelectedFile().getAbsolutePath());
+                setSound();
+                break;
         }
     }//GEN-LAST:event_btnAddSoundActionPerformed
+
+    private void btnAddImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddImageActionPerformed
+        switch (fcImage.showOpenDialog(this)) {
+            case JFileChooser.APPROVE_OPTION:
+                break;
+        }
+    }//GEN-LAST:event_btnAddImageActionPerformed
+
+    private void btnSoundPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSoundPlayActionPerformed
+        playSound();
+    }//GEN-LAST:event_btnSoundPlayActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddImage;
     private javax.swing.JButton btnAddSound;
+    private javax.swing.JButton btnSoundPlay;
     private javax.swing.JComboBox<String> cbPartsOfSpeech;
     private javax.swing.JFileChooser fcExample;
     private javax.swing.JFileChooser fcImage;
@@ -256,13 +375,14 @@ public class AddWord extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JLabel lbSoundSrc;
     private javax.swing.JTextArea taExample;
     private javax.swing.JTextArea taMeaning;
     private javax.swing.JTextField txtImageSrc;
-    private javax.swing.JTextField txtSoundSrc;
     private javax.swing.JTextField txtSpelling;
     private javax.swing.JTextField txtWord;
     // End of variables declaration//GEN-END:variables
