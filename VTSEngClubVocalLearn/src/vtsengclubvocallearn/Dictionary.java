@@ -155,10 +155,9 @@ public class Dictionary extends javax.swing.JFrame {
 
     private void btnNewWordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewWordActionPerformed
         AddWord addWordForm = new AddWord();
-        addWordForm.startup();
         switch (JOptionPane.showConfirmDialog(this, addWordForm, "VTS Add new word", JOptionPane.OK_CANCEL_OPTION)) {
             case 0:
-                System.out.println(addWordForm.getInfo().getName());
+                System.out.println(addWordForm.getInfo().toString());
                 break;
 
         }

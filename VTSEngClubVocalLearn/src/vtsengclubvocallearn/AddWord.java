@@ -5,23 +5,28 @@
  */
 package vtsengclubvocallearn;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
+import java.util.ArrayList;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.filechooser.FileView;
+import trung.dao.GradeDAO;
+import trung.dao.UnitDAO;
+import trung.dto.GradeDTO;
+import trung.dto.UnitDTO;
 import trung.dto.WordDTO;
+import util.MyUtil;
 
 /**
  *
@@ -32,65 +37,75 @@ public class AddWord extends javax.swing.JPanel {
     File music;
     Media media;
     MediaPlayer mediaPlayer;
+    BufferedImage bufferImage;
+    JLabel picLabel;
+    JPanel jpImage;
+    File imageDes;
+    GradeDAO gradeDao = new GradeDAO();
+    UnitDAO unitDao = new UnitDAO();
+    ArrayList<GradeDTO> grades = new ArrayList<>();
+    ArrayList<UnitDTO> units = new ArrayList<>();
 
     /**
      * Creates new form AddWord
      */
     public AddWord() {
         initComponents();
+        firstStartup();
+    }
+
+    public void firstStartup() {
+
+        txtWord.setText("");
+        txtSpelling.setText("");
+        taMeaning.setText("");
+        cbPartsOfSpeech.setSelectedIndex(0);
 
         fcImage.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "png"));
         fcSound.setFileFilter(new FileNameExtensionFilter("Sound files", "MP3", "wav"));
+        fcExample.setFileFilter(new FileNameExtensionFilter("Sound files", "MP3", "wav"));
 
         music = new File("D:\\music.mp3");
         media = new Media(music.toURI().toString());
         mediaPlayer = new MediaPlayer(media);
-
-    }
-
-    public void startup() {
-
-        txtWord.setText("");
-        txtSpelling.setText("");
-        txtImageSrc.setText("");
-//        txtSoundSrc.setText("");
-        taMeaning.setText("");
-        cbPartsOfSpeech.setSelectedIndex(0);
+        
+        loadGrades();
     }
 
     public WordDTO getInfo() {
         WordDTO result = new WordDTO();
 
-//        result.setExSoundSrc(txtSoundSrc.getText());
-        result.setExample(taExample.getText());
-        result.setMeaning(taMeaning.getText());
         result.setName(txtWord.getText());
-        result.setPartsOfSpeech(cbPartsOfSpeech.getSelectedItem().toString());
         result.setSpelling(txtSpelling.getText());
-
+        result.setSpellingSrc(music.getPath());
+        result.setPartsOfSpeech(cbPartsOfSpeech.getSelectedItem().toString());
+        result.setImageSrc(imageDes.getPath());
+        result.setMeaning(taMeaning.getText());
+        result.setExample(taExample.getText());
+//        result.setExSoundSrc(TOOL_TIP_TEXT_KEY);
+        result.setGradeSEQ(grades.get(cbGrade.getSelectedIndex()).getSEQ());
+        result.setUnitSEQ(units.get(cbUnit.getSelectedIndex()).getSEQ());
+        
         return result;
     }
 
     private void setSound() {
         mediaPlayer.stop();
         btnSoundPlay.setText("Play");
-        
+
         File sound = fcSound.getSelectedFile();
         File des = new File("src\\resources\\sound\\" + sound.getName());
-        
+
         lbSoundSrc.setText(sound.getName());
+        try {
+            Files.copy(sound.toPath(), des.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-        
-            try {
-                Files.copy(sound.toPath(), des.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-                music = new File(des.getAbsolutePath());
-                media = new Media(music.toURI().toString());
-                mediaPlayer = new MediaPlayer(media);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        
+            music = new File(des.getPath());
+            media = new Media(music.toURI().toString());
+            mediaPlayer = new MediaPlayer(media);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     public void playSound() {
@@ -105,6 +120,53 @@ public class AddWord extends javax.swing.JPanel {
 
     public void stopSound() {
         mediaPlayer.stop();
+    }
+
+    private void setImage() { //can xem lai ve viec dat ten cho image
+        File image = fcImage.getSelectedFile();
+        imageDes = new File("src\\resources\\image\\" + image.getName());
+        
+        lbImageSrc.setText(image.getName());
+
+        
+        try {
+            Image originImage = ImageIO.read(image);
+            
+            Double newWeight = 600.0 * ((double)originImage.getHeight(this) / (double)originImage.getWidth(this));
+            
+            BufferedImage resizeImage = MyUtil.createResizedCopy(originImage, 600, newWeight.intValue(), true);
+            
+            ImageIO.write(resizeImage, "jpg", imageDes);
+                            
+            bufferImage = ImageIO.read(imageDes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void previewImage() {
+        picLabel = new JLabel(new ImageIcon(bufferImage));
+        jpImage = new JPanel();
+        jpImage.add(picLabel);
+        jpImage.repaint();
+
+        JOptionPane.showMessageDialog(this, jpImage);
+    }
+
+    private void loadGrades() {
+        grades = gradeDao.getAllGrade();
+        cbGrade.removeAllItems();
+        for (GradeDTO dto : grades) {
+            cbGrade.addItem("Grade " + dto.getNumber());
+        }
+    }
+
+    private void loadUnitByGradeSEQ(int gradeSEQ) {
+        cbUnit.removeAllItems();
+        units = unitDao.getAllUnitByGradeSEQ(gradeSEQ);
+        for (UnitDTO dto : units) {
+            cbUnit.addItem("Unit " + dto.getNumber() + ": " + dto.getName());
+        }
     }
 
     /**
@@ -129,7 +191,6 @@ public class AddWord extends javax.swing.JPanel {
         txtSpelling = new javax.swing.JTextField();
         btnAddSound = new javax.swing.JButton();
         cbPartsOfSpeech = new javax.swing.JComboBox<>();
-        txtImageSrc = new javax.swing.JTextField();
         btnAddImage = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         taMeaning = new javax.swing.JTextArea();
@@ -140,12 +201,13 @@ public class AddWord extends javax.swing.JPanel {
         jButton1 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cbGrade = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        cbUnit = new javax.swing.JComboBox<>();
         btnSoundPlay = new javax.swing.JButton();
         lbSoundSrc = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
+        lbImageSrc = new javax.swing.JLabel();
+        btnImagePreview = new javax.swing.JButton();
 
         jLabel1.setText("Word");
 
@@ -191,11 +253,16 @@ public class AddWord extends javax.swing.JPanel {
 
         jLabel4.setText("Grade");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbGrade.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbGrade.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbGradeItemStateChanged(evt);
+            }
+        });
 
         jLabel5.setText("Unit");
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbUnit.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         btnSoundPlay.setText("Play");
         btnSoundPlay.addActionListener(new java.awt.event.ActionListener() {
@@ -204,16 +271,12 @@ public class AddWord extends javax.swing.JPanel {
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 120, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 118, Short.MAX_VALUE)
-        );
+        btnImagePreview.setText("Preview");
+        btnImagePreview.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImagePreviewActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -232,12 +295,17 @@ public class AddWord extends javax.swing.JPanel {
                         .addGap(21, 21, 21)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(txtImageSrc, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtWord, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtSpelling, javax.swing.GroupLayout.Alignment.LEADING))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnAddImage))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtWord)
+                                    .addComponent(txtSpelling)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(lbImageSrc)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnAddImage)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnImagePreview)
+                                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGap(52, 52, 52))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(cbPartsOfSpeech, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -257,23 +325,18 @@ public class AddWord extends javax.swing.JPanel {
                             .addComponent(jLabel5))
                         .addGap(21, 21, 21)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jTextField1)
+                                .addGap(52, 52, 52))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
-                                    .addComponent(jScrollPane1)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jTextField1)
-                                        .addGap(52, 52, 52))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                    .addComponent(cbUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(cbGrade, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -300,16 +363,14 @@ public class AddWord extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
-                    .addComponent(txtImageSrc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAddImage))
+                    .addComponent(btnAddImage)
+                    .addComponent(lbImageSrc)
+                    .addComponent(btnImagePreview))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(213, 213, 213)
-                        .addComponent(jButton1)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton1))
+                    .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel12)
@@ -325,12 +386,12 @@ public class AddWord extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
-                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap())))
+                            .addComponent(cbGrade, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cbUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -345,6 +406,7 @@ public class AddWord extends javax.swing.JPanel {
     private void btnAddImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddImageActionPerformed
         switch (fcImage.showOpenDialog(this)) {
             case JFileChooser.APPROVE_OPTION:
+                setImage();
                 break;
         }
     }//GEN-LAST:event_btnAddImageActionPerformed
@@ -353,18 +415,29 @@ public class AddWord extends javax.swing.JPanel {
         playSound();
     }//GEN-LAST:event_btnSoundPlayActionPerformed
 
+    private void btnImagePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImagePreviewActionPerformed
+        previewImage();
+    }//GEN-LAST:event_btnImagePreviewActionPerformed
+
+    private void cbGradeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbGradeItemStateChanged
+        if (cbGrade.getSelectedIndex() > -1) {
+            loadUnitByGradeSEQ(grades.get(cbGrade.getSelectedIndex()).getSEQ());
+        }
+    }//GEN-LAST:event_cbGradeItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddImage;
     private javax.swing.JButton btnAddSound;
+    private javax.swing.JButton btnImagePreview;
     private javax.swing.JButton btnSoundPlay;
+    private javax.swing.JComboBox<String> cbGrade;
     private javax.swing.JComboBox<String> cbPartsOfSpeech;
+    private javax.swing.JComboBox<String> cbUnit;
     private javax.swing.JFileChooser fcExample;
     private javax.swing.JFileChooser fcImage;
     private javax.swing.JFileChooser fcSound;
     private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -375,14 +448,13 @@ public class AddWord extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JLabel lbImageSrc;
     private javax.swing.JLabel lbSoundSrc;
     private javax.swing.JTextArea taExample;
     private javax.swing.JTextArea taMeaning;
-    private javax.swing.JTextField txtImageSrc;
     private javax.swing.JTextField txtSpelling;
     private javax.swing.JTextField txtWord;
     // End of variables declaration//GEN-END:variables

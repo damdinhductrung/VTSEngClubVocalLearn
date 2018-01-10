@@ -126,6 +126,11 @@ public class WordDTO {
     public void setGradeSEQ(int gradeSEQ) {
         this.gradeSEQ = gradeSEQ;
     }
+
+    @Override
+    public String toString() {
+        return "WordDTO{" + "SEQ=" + SEQ + ", name=" + name + ", spelling=" + spelling + ", spellingSrc=" + spellingSrc + ", partsOfSpeech=" + partsOfSpeech + ", imageSrc=" + imageSrc + ", meaning=" + meaning + ", example=" + example + ", exSoundSrc=" + exSoundSrc + ", unitSEQ=" + unitSEQ + ", gradeSEQ=" + gradeSEQ + '}';
+    }
     
     
 }
