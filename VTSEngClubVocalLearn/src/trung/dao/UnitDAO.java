@@ -47,7 +47,7 @@ public class UnitDAO {
         try {
             conn = MyConnection.getConnection();
             String sql = "Select SEQ, Number, Name from Unit where Grade_SEQ = ?";
-            pre = conn.prepareCall(sql);
+            pre = conn.prepareStatement(sql);
             pre.setInt(1, gradeSEQ);
             rs = pre.executeQuery();
             while (rs.next()) {
@@ -74,7 +74,7 @@ public class UnitDAO {
         try {
             conn = MyConnection.getConnection();
             String sql = "Select Number, Name from Unit where SEQ = ?";
-            pre = conn.prepareCall(sql);
+            pre = conn.prepareStatement(sql);
             pre.setInt(1, unitSEQ);
             rs = pre.executeQuery();
             if (rs.next()) {
@@ -98,7 +98,7 @@ public class UnitDAO {
         try {
             conn = MyConnection.getConnection();
             String sql = "Select Name from Unit where Number = ? and Grade_SEQ = ?";
-            pre = conn.prepareCall(sql);
+            pre = conn.prepareStatement(sql);
             pre.setInt(1, number);
             pre.setInt(2, gradeSEQ);
             if (pre.execute()) {
@@ -119,7 +119,7 @@ public class UnitDAO {
         try {
             conn = MyConnection.getConnection();
             String sql = "INSERT INTO Unit (`Number`, `Name`, `Grade_SEQ`) VALUES (?, ?, ?)";
-            pre = conn.prepareCall(sql);
+            pre = conn.prepareStatement(sql);
             pre.setInt(1, dto.getNumber());
             pre.setString(2, dto.getName());
             pre.setInt(3, gradeSEQ);
@@ -143,7 +143,7 @@ public class UnitDAO {
         try {
             conn = MyConnection.getConnection();
             String sql = "update Unit Set Number = ?, Name = ? where Grade_SEQ = ?";
-            pre = conn.prepareCall(sql);
+            pre = conn.prepareStatement(sql);
             pre.setInt(1, dto.getNumber());
             pre.setString(2, dto.getName());
             pre.setInt(3, dto.getSEQ());
@@ -167,7 +167,7 @@ public class UnitDAO {
         try {
             conn = MyConnection.getConnection();
             String sql = "Select Name from Unit where Number = ? and Grade_SEQ = ?";
-            pre = conn.prepareCall(sql);
+            pre = conn.prepareStatement(sql);
             pre.setInt(1, number);
             pre.setInt(2, gradeSEQ);
             

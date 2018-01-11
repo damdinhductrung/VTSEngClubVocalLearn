@@ -10,12 +10,15 @@ import java.awt.Dimension;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javax.swing.JOptionPane;
+import trung.dao.WordDAO;
+import trung.dto.WordDTO;
 
 /**
  *
  * @author Trung
  */
 public class Dictionary extends javax.swing.JFrame {
+
     final JFXPanel fxPanel = new JFXPanel();
 
     /**
@@ -23,12 +26,20 @@ public class Dictionary extends javax.swing.JFrame {
      */
     public Dictionary() {
         initComponents();
-        
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
             }
         });
+        
+        testInsertWord();
+    }
+    
+    private void testInsertWord() {
+        WordDTO dto = new WordDTO(0, "g", "c", "c", "c", "c", "c", "c", "c", 1);
+        WordDAO dao = new WordDAO();
+        dao.saveNewWord(dto);
     }
 
     /**
@@ -70,8 +81,6 @@ public class Dictionary extends javax.swing.JFrame {
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Word"));
-
-        jTextField1.setText("jTextField1");
 
         btnSearchWord.setText("Search");
 
@@ -156,14 +165,17 @@ public class Dictionary extends javax.swing.JFrame {
     private void btnNewWordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewWordActionPerformed
         AddWord addWordForm = new AddWord();
         switch (JOptionPane.showConfirmDialog(this, addWordForm, "VTS Add new word", JOptionPane.OK_CANCEL_OPTION)) {
-            case 0:
-                System.out.println(addWordForm.getInfo().toString());
+            case 0: //Người dùng chọn ok
+                //dừng âm thanh đang chạy
+                addWordForm.stopSound();
+                addWordForm.stopEx();
+                
+                //Lưu word
+                WordDAO dao = new WordDAO();
+                dao.saveNewWord(addWordForm.getInfo());
+                
                 break;
-
         }
-        
-        
-        addWordForm.stopSound();
     }//GEN-LAST:event_btnNewWordActionPerformed
 
     /**

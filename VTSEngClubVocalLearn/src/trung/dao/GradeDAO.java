@@ -43,7 +43,7 @@ public class GradeDAO {
         try {
             conn = MyConnection.getConnection();
             String sql = "Select SEQ, Number from Grade";
-            pre = conn.prepareCall(sql);
+            pre = conn.prepareStatement(sql);
             rs = pre.executeQuery();
             while (rs.next()) {
                 GradeDTO dto = new GradeDTO();
@@ -72,7 +72,7 @@ public class GradeDAO {
         try {
             conn = MyConnection.getConnection();
             String sql = "Select Number from Grade where SEQ = ?";
-            pre = conn.prepareCall(sql);
+            pre = conn.prepareStatement(sql);
             pre.setInt(1, gradeSEQ);
             rs = pre.executeQuery();
             if (rs.next()) {

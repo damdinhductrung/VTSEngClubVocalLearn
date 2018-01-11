@@ -20,12 +20,11 @@ public class WordDTO {
     String example;
     String exSoundSrc;
     int unitSEQ;
-    int gradeSEQ;
 
     public WordDTO() {
     }
 
-    public WordDTO(int SEQ, String name, String spelling, String spellingSrc, String partsOfSpeech, String imageSrc, String meaning, String example, String exSoundSrc, int unitSEQ, int gradeSEQ) {
+    public WordDTO(int SEQ, String name, String spelling, String spellingSrc, String partsOfSpeech, String imageSrc, String meaning, String example, String exSoundSrc, int unitSEQ) {
         this.SEQ = SEQ;
         this.name = name;
         this.spelling = spelling;
@@ -36,7 +35,6 @@ public class WordDTO {
         this.example = example;
         this.exSoundSrc = exSoundSrc;
         this.unitSEQ = unitSEQ;
-        this.gradeSEQ = gradeSEQ;
     }
 
     public int getSEQ() {
@@ -119,18 +117,12 @@ public class WordDTO {
         this.unitSEQ = unitSEQ;
     }
 
-    public int getGradeSEQ() {
-        return gradeSEQ;
-    }
-
-    public void setGradeSEQ(int gradeSEQ) {
-        this.gradeSEQ = gradeSEQ;
-    }
-
     @Override
     public String toString() {
-        return "WordDTO{" + "SEQ=" + SEQ + ", name=" + name + ", spelling=" + spelling + ", spellingSrc=" + spellingSrc + ", partsOfSpeech=" + partsOfSpeech + ", imageSrc=" + imageSrc + ", meaning=" + meaning + ", example=" + example + ", exSoundSrc=" + exSoundSrc + ", unitSEQ=" + unitSEQ + ", gradeSEQ=" + gradeSEQ + '}';
+        return "WordDTO{" + "SEQ=" + SEQ + ", name=" + name + ", spelling=" + spelling + ", spellingSrc=" + spellingSrc + ", partsOfSpeech=" + partsOfSpeech + ", imageSrc=" + imageSrc + ", meaning=" + meaning + ", example=" + example + ", exSoundSrc=" + exSoundSrc + ", unitSEQ=" + unitSEQ + '}';
     }
+
+    
     
     
 }

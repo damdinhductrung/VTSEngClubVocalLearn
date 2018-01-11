@@ -22,3 +22,7 @@ INSERT INTO `vtsengclubvocallearn`.`unit` (`Number`, `Name`, `Grade_SEQ`) VALUES
 INSERT INTO `vtsengclubvocallearn`.`unit` (`Number`, `Name`, `Grade_SEQ`) VALUES ('16', 'Man and the environment', '1');
 SELECT * FROM vtsengclubvocallearn.unit;
 
+INSERT INTO grade (Number) values ('10');
+Select last_insert_id();
+
+INSERT INTO word ('name') values ('lalaland');
