@@ -51,13 +51,14 @@ public class GradeDAO {
                 dto.setNumber(rs.getInt("Number"));
                 result.add(dto);
             }
+            System.out.println("----GET ALL GRADE----");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeConnection();
         }
         
-        System.out.println("----GET ALL GRADE----");
+        
         return result;
     }
     
@@ -79,13 +80,14 @@ public class GradeDAO {
                 result.setSEQ(gradeSEQ);
                 result.setNumber(rs.getInt("Number"));
             }
+            System.out.println("----GET GRADE SEQ " + gradeSEQ + " INFO----");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeConnection();
         }
         
-        System.out.println("----GET GRADE SEQ " + gradeSEQ + " INFO----");
+        
         return result;
     }
     

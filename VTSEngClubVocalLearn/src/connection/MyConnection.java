@@ -16,9 +16,10 @@ public class MyConnection {
     public static Connection getConnection(){
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/VTSEngClubVocalLearn", "root", "password");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/VTSEngClubVocalLearn?useSSL=false", "root", "password");
             return conn;
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }

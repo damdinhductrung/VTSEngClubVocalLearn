@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import trung.dao.GradeDAO;
 import trung.dao.UnitDAO;
+import trung.dao.WordDAO;
 import trung.dto.GradeDTO;
 import trung.dto.UnitDTO;
 import trung.dto.WordDTO;
@@ -32,8 +33,10 @@ import util.MyUtil;
  *
  * @author Trung
  */
-public class AddWord extends javax.swing.JPanel {
+public class AddWordForm extends javax.swing.JFrame {
 
+    Dictionary dic;
+    
     Media media;
     MediaPlayer soundMediaPlayer;
     MediaPlayer exMediaPlayer;
@@ -48,47 +51,54 @@ public class AddWord extends javax.swing.JPanel {
     ArrayList<GradeDTO> grades = new ArrayList<>();
     ArrayList<UnitDTO> units = new ArrayList<>();
 
+    String inputErrors = "";
+
     /**
-     * Creates new form AddWord
+     * Creates new form Add
      */
-    public AddWord() {
+    public AddWordForm() {
         initComponents();
         firstStartup();
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        
     }
 
     public void firstStartup() {
-
-        txtWord.setText("");
-        txtSpelling.setText("");
-        taMeaning.setText("");
-        cbPartsOfSpeech.setSelectedIndex(0);
-
         //Tạo loại file đc chọn cho file choosen
         fcImage.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "png"));
         fcSound.setFileFilter(new FileNameExtensionFilter("Sound files", "MP3", "wav"));
 
         //Lấy dữ liệu grade
         loadGrades();
+
+    }
+    
+    public void setDictionary(Dictionary parent) {
+        this.dic = parent;
     }
 
-    public WordDTO getInfo() {
-        WordDTO result = new WordDTO();
-
-        result.setName(txtWord.getText());
-        result.setSpelling(txtSpelling.getText());
-        result.setSpellingSrc(soundDes.getPath());
-        result.setPartsOfSpeech(cbPartsOfSpeech.getSelectedItem().toString());
-        result.setImageSrc(imageDes.getPath());
-        result.setMeaning(taMeaning.getText());
-        result.setExample(taExample.getText());
-        result.setExSoundSrc(exDes.getPath());
-        result.setUnitSEQ(units.get(cbUnit.getSelectedIndex()).getSEQ());
-
-        return result;
+    public void saveWord() {
+        WordDTO dto = new WordDTO();
+        WordDAO dao = new WordDAO();
+        if (checkInput()) {
+            dto.setName(txtWord.getText());
+            dto.setSpelling(txtSpelling.getText());
+            dto.setSpellingSrc(soundDes.getPath());
+            dto.setPartsOfSpeech(cbPartsOfSpeech.getSelectedItem().toString());
+            dto.setImageSrc(imageDes.getPath());
+            dto.setMeaning(taMeaning.getText());
+            dto.setExample(taExample.getText());
+            dto.setExSoundSrc(exDes.getPath());
+            dto.setUnitSEQ(units.get(cbUnit.getSelectedIndex()).getSEQ());
+            dao.saveNewWord(dto);
+            JOptionPane.showMessageDialog(this, "Input successful");
+        } else {
+            JOptionPane.showMessageDialog(this, inputErrors, "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void setSound() {
-        
+
         if (soundMediaPlayer != null) {
             soundMediaPlayer.stop();
             btnSoundPlay.setText("Play");
@@ -97,14 +107,13 @@ public class AddWord extends javax.swing.JPanel {
 
         //Lấy file đc chọn
         preSound = fcSound.getSelectedFile();
-        
+
         //Tạo địa chỉ mới cho file đc chọn
         soundDes = new File("src\\resources\\sound\\" + preSound.getName());
 
         //Set label
         lbSoundSrc.setText(preSound.getName());
-        
-        
+
         try {
             //Copy file cũ sang địa chỉ mới
             Files.copy(preSound.toPath(), soundDes.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -128,13 +137,15 @@ public class AddWord extends javax.swing.JPanel {
     }
 
     public void stopSound() {
-        soundMediaPlayer.stop();
+        if (soundMediaPlayer != null) {
+            soundMediaPlayer.stop();
+        }
     }
 
     private void setImage() { //can xem lai ve viec dat ten cho image
         //Lấy file từ file chooser
         File image = fcImage.getSelectedFile();
-        
+
         //Tạo địa chỉ mới cho file
         imageDes = new File("src\\resources\\image\\" + image.getName());
 
@@ -164,12 +175,12 @@ public class AddWord extends javax.swing.JPanel {
     private void previewImage() {
         //chuyển hình sang dạng label
         picLabel = new JLabel(new ImageIcon(bufferImage));
-        
+
         jpImage = new JPanel();
-        
+
         //cho label vào panel mới
         jpImage.add(picLabel);
-        
+
         //paint lại panel vs hình
         jpImage.repaint();
 
@@ -205,7 +216,7 @@ public class AddWord extends javax.swing.JPanel {
         lbExSrc.setText(preSound.getName());
         try {
             Files.copy(preSound.toPath(), exDes.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            
+
             media = new Media(exDes.toURI().toString());
             exMediaPlayer = new MediaPlayer(media);
         } catch (IOException ex) {
@@ -224,7 +235,77 @@ public class AddWord extends javax.swing.JPanel {
     }
 
     public void stopEx() {
-        exMediaPlayer.stop();
+        if (exMediaPlayer != null) {
+            exMediaPlayer.stop();
+        }
+    }
+
+    public boolean checkInput() {
+        WordDAO wordDao = new WordDAO();
+        boolean result = true;
+        inputErrors = "";
+
+        //Check name
+        //check null name
+        if (txtWord.getText().isEmpty()) {
+            result = false;
+            inputErrors = inputErrors + "Input word\n";
+        } //check special character
+        else if (!txtWord.getText().matches("^[A-z]+$")) {
+            System.out.println("word: '" + txtWord.getText() + "'");
+            System.out.println("Match? " + txtWord.getText().matches("/^[A-z]+$/"));
+            result = false;
+            inputErrors = inputErrors + "Word contain only alphabet character\n";
+        } //check unique name
+        else if (!wordDao.isUniqueName(txtWord.getName())) {
+            result = false;
+            inputErrors = inputErrors + "Word has been added\n";
+        }
+
+        //check spelling
+        //check null spelling
+        if (txtSpelling.getText().isEmpty()) {
+            result = false;
+            inputErrors = inputErrors + "Input spelling\n";
+        }
+
+        //check spelling sound
+        //check not choose
+        if (lbSoundSrc.getText().isEmpty()) {
+            result = false;
+            inputErrors = inputErrors + "Choose spelling sound\n";
+        }
+
+        //check image
+        //check not choose
+        if (lbImageSrc.getText().isEmpty()) {
+            result = false;
+            inputErrors = inputErrors + "Choose image\n";
+        }
+
+        //check meaning
+        //check null meaning
+        if (taMeaning.getText().isEmpty()) {
+            result = false;
+            inputErrors = inputErrors + "Input meaning\n";
+        }
+
+        //check example
+        //check null example
+        if (taExample.getText().isEmpty()) {
+            result = false;
+            inputErrors = inputErrors + "Input example\n";
+        }
+
+        //check ex sound
+        //check not choose
+        if (lbExSrc.getText().isEmpty()) {
+            result = false;
+            inputErrors = inputErrors + "Choose example sound\n";
+        }
+
+//        taError.setText(inputErrors);
+        return result;
     }
 
     /**
@@ -238,6 +319,7 @@ public class AddWord extends javax.swing.JPanel {
 
         fcSound = new javax.swing.JFileChooser();
         fcImage = new javax.swing.JFileChooser();
+        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
@@ -266,6 +348,17 @@ public class AddWord extends javax.swing.JPanel {
         btnImagePreview = new javax.swing.JButton();
         lbExSrc = new javax.swing.JLabel();
         btnExPlay = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        btnOk = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
+
+        jPanel1.setPreferredSize(new java.awt.Dimension(600, 500));
 
         jLabel1.setText("Word");
 
@@ -348,119 +441,155 @@ public class AddWord extends javax.swing.JPanel {
             }
         });
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        btnOk.setText("Ok");
+        btnOk.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOkActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
                             .addComponent(jLabel8)
                             .addComponent(jLabel9)
                             .addComponent(jLabel10)
                             .addComponent(jLabel11))
                         .addGap(21, 21, 21)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtWord)
-                                    .addComponent(txtSpelling)
-                                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtSpelling)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(lbImageSrc)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(btnAddImage)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(btnImagePreview)
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-                                .addGap(64, 64, 64))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(btnImagePreview))
                                     .addComponent(cbPartsOfSpeech, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(lbSoundSrc)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(btnAddSound)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(btnSoundPlay)))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtWord)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel12)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
                             .addComponent(jLabel5))
                         .addGap(21, 21, 21)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 493, Short.MAX_VALUE)
                             .addComponent(jScrollPane1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(cbUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(cbGrade, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(lbExSrc)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(btnAddEx)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(btnExPlay)))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addGap(64, 64, 64))))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnOk)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCancel)))
+                .addContainerGap())
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtWord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtSpelling, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(btnAddSound)
                     .addComponent(btnSoundPlay)
                     .addComponent(lbSoundSrc))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
                     .addComponent(cbPartsOfSpeech, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
                     .addComponent(btnAddImage)
                     .addComponent(lbImageSrc)
                     .addComponent(btnImagePreview))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel12)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(lbExSrc)
                     .addComponent(btnAddEx)
                     .addComponent(btnExPlay))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel4)
                     .addComponent(cbGrade, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cbUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(cbUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCancel)
+                    .addComponent(btnOk))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 624, Short.MAX_VALUE)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 624, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 498, Short.MAX_VALUE)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 498, Short.MAX_VALUE))
+        );
+
+        pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddSoundActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddSoundActionPerformed
@@ -479,20 +608,6 @@ public class AddWord extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnAddImageActionPerformed
 
-    private void btnSoundPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSoundPlayActionPerformed
-        playSound();
-    }//GEN-LAST:event_btnSoundPlayActionPerformed
-
-    private void btnImagePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImagePreviewActionPerformed
-        previewImage();
-    }//GEN-LAST:event_btnImagePreviewActionPerformed
-
-    private void cbGradeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbGradeItemStateChanged
-        if (cbGrade.getSelectedIndex() > -1) {
-            loadUnitByGradeSEQ(grades.get(cbGrade.getSelectedIndex()).getSEQ());
-        }
-    }//GEN-LAST:event_cbGradeItemStateChanged
-
     private void btnAddExActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddExActionPerformed
         switch (fcSound.showOpenDialog(this)) {
             case JFileChooser.APPROVE_OPTION:
@@ -501,17 +616,83 @@ public class AddWord extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnAddExActionPerformed
 
+    private void cbGradeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbGradeItemStateChanged
+        if (cbGrade.getSelectedIndex() > -1) {
+            loadUnitByGradeSEQ(grades.get(cbGrade.getSelectedIndex()).getSEQ());
+        }
+    }//GEN-LAST:event_cbGradeItemStateChanged
+
+    private void btnSoundPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSoundPlayActionPerformed
+        playSound();
+    }//GEN-LAST:event_btnSoundPlayActionPerformed
+
+    private void btnImagePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImagePreviewActionPerformed
+        previewImage();
+    }//GEN-LAST:event_btnImagePreviewActionPerformed
+
     private void btnExPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExPlayActionPerformed
         playEx();
     }//GEN-LAST:event_btnExPlayActionPerformed
 
+    private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
+        saveWord();
+        this.dispose();
+    }//GEN-LAST:event_btnOkActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        dic.setEnabled(true);
+    }//GEN-LAST:event_formWindowClosed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(AddWordForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(AddWordForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(AddWordForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(AddWordForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new AddWordForm().setVisible(true);
+            }
+        });
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddEx;
     private javax.swing.JButton btnAddImage;
     private javax.swing.JButton btnAddSound;
+    private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnExPlay;
     private javax.swing.JButton btnImagePreview;
+    private javax.swing.JButton btnOk;
     private javax.swing.JButton btnSoundPlay;
     private javax.swing.JComboBox<String> cbGrade;
     private javax.swing.JComboBox<String> cbPartsOfSpeech;
@@ -528,6 +709,7 @@ public class AddWord extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lbExSrc;

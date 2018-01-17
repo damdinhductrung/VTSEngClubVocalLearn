@@ -6,6 +6,7 @@
 package vtsengclubvocallearn;
 
 import connection.MyConnection;
+import trung.dao.WordDAO;
 
 /**
  *
@@ -17,7 +18,9 @@ public class VTSEngClubVocalLearn {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
+        WordDAO dao = new WordDAO();
+        dao.isUniqueName("b");
+        dao.isUniqueName("lalalando");
     }
     
 }

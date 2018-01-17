@@ -58,13 +58,14 @@ public class UnitDAO {
                 dto.setGradeSEQ(gradeSEQ);
                 result.add(dto);
             }
+            System.out.println("----GET UNITS GRADE SEQ " + gradeSEQ + "----");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeConnection();
         }
         
-        System.out.println("----GET UNITS GRADE SEQ " + gradeSEQ + "----");
+        
         return result;
     }
     
@@ -82,13 +83,14 @@ public class UnitDAO {
                 result.setNumber(rs.getInt("Number"));
                 result.setName(rs.getString("Name"));
             }
+            System.out.println("----GET UNIT INFO SEQ " + unitSEQ + "----");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeConnection();
         }
         
-        System.out.println("----GET UNIT INFO SEQ " + unitSEQ + "----");
+        
         return result;
     }
     
@@ -104,6 +106,7 @@ public class UnitDAO {
             if (pre.execute()) {
                 result = true;
             }
+            System.out.println("----Check Unit Number num: " + number + " gradeSEQ: " + gradeSEQ + "----");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -127,7 +130,7 @@ public class UnitDAO {
             if (pre.executeUpdate() > 0) {
                 result = true;
             }
-            
+            System.out.println("----Create Unit by gradeSEQ: " + gradeSEQ + "----");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

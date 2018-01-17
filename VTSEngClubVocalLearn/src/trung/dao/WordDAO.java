@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import trung.dto.WordDTO;
 
 /**
@@ -34,6 +35,21 @@ public class WordDAO {
             }
         } catch (Exception e) {
         }
+    }
+    
+    public ArrayList<WordDTO> getAllWord() {
+        ArrayList<WordDTO> result = new ArrayList<>();
+        
+        try {
+            conn = MyConnection.getConnection();
+//            String sql = "Select "
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        
+        return result;
     }
     
     public boolean saveNewWord(WordDTO dto) {
@@ -68,6 +84,27 @@ public class WordDAO {
             pre.executeUpdate();
             
             conn.commit();
+            result = true;
+            System.out.println("----Save new Word----");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        
+        return result;
+    }
+    
+    public boolean isUniqueName(String name) {
+        boolean result = true;
+        
+        try {
+            conn = MyConnection.getConnection();
+            String sql = "Select `SEQ` from `word` where `Name` = ?";
+            pre = conn.prepareStatement(sql);
+            pre.setString(1, name);
+            rs = pre.executeQuery();
+            result = !rs.next();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

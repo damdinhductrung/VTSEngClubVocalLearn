@@ -102,7 +102,7 @@
                       <Component id="btnSearchWord" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
-                      <Component id="btnNewWord" min="-2" pref="60" max="-2" attributes="0"/>
+                      <Component id="btnShowAddForm" min="-2" pref="60" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnUpdateWord" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -121,12 +121,12 @@
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="btnNewWord" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnShowAddForm" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnUpdateWord" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnDeleteWord" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane1" pref="663" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="693" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -139,12 +139,12 @@
             <Property name="text" type="java.lang.String" value="Search"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="btnNewWord">
+        <Component class="javax.swing.JButton" name="btnShowAddForm">
           <Properties>
             <Property name="text" type="java.lang.String" value="New"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNewWordActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnShowAddFormActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnUpdateWord">

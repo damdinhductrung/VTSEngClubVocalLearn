@@ -5,10 +5,10 @@
  */
 package vtsengclubvocallearn;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.util.ArrayList;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import trung.dao.WordDAO;
 import trung.dto.WordDTO;
@@ -19,6 +19,7 @@ import trung.dto.WordDTO;
  */
 public class Dictionary extends javax.swing.JFrame {
 
+    ArrayList<WordDTO> words = new ArrayList<>();
     final JFXPanel fxPanel = new JFXPanel();
 
     /**
@@ -32,10 +33,12 @@ public class Dictionary extends javax.swing.JFrame {
             public void run() {
             }
         });
-        
-        testInsertWord();
     }
     
+    public void showWords() {
+        
+    }
+
     private void testInsertWord() {
         WordDTO dto = new WordDTO(0, "g", "c", "c", "c", "c", "c", "c", "c", 1);
         WordDAO dao = new WordDAO();
@@ -55,7 +58,7 @@ public class Dictionary extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jTextField1 = new javax.swing.JTextField();
         btnSearchWord = new javax.swing.JButton();
-        btnNewWord = new javax.swing.JButton();
+        btnShowAddForm = new javax.swing.JButton();
         btnUpdateWord = new javax.swing.JButton();
         btnDeleteWord = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -84,10 +87,10 @@ public class Dictionary extends javax.swing.JFrame {
 
         btnSearchWord.setText("Search");
 
-        btnNewWord.setText("New");
-        btnNewWord.addActionListener(new java.awt.event.ActionListener() {
+        btnShowAddForm.setText("New");
+        btnShowAddForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnNewWordActionPerformed(evt);
+                btnShowAddFormActionPerformed(evt);
             }
         });
 
@@ -112,7 +115,7 @@ public class Dictionary extends javax.swing.JFrame {
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                     .addComponent(btnSearchWord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGroup(jPanel2Layout.createSequentialGroup()
-                    .addComponent(btnNewWord, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnShowAddForm, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                     .addComponent(btnUpdateWord)
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -127,11 +130,11 @@ public class Dictionary extends javax.swing.JFrame {
                     .addComponent(btnSearchWord))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnNewWord)
+                    .addComponent(btnShowAddForm)
                     .addComponent(btnUpdateWord)
                     .addComponent(btnDeleteWord))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 663, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 693, Short.MAX_VALUE))
         );
 
         jMenuBar1.setPreferredSize(new java.awt.Dimension(66, 30));
@@ -162,21 +165,12 @@ public class Dictionary extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnNewWordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewWordActionPerformed
-        AddWord addWordForm = new AddWord();
-        switch (JOptionPane.showConfirmDialog(this, addWordForm, "VTS Add new word", JOptionPane.OK_CANCEL_OPTION)) {
-            case 0: //Người dùng chọn ok
-                //dừng âm thanh đang chạy
-                addWordForm.stopSound();
-                addWordForm.stopEx();
-                
-                //Lưu word
-                WordDAO dao = new WordDAO();
-                dao.saveNewWord(addWordForm.getInfo());
-                
-                break;
-        }
-    }//GEN-LAST:event_btnNewWordActionPerformed
+    private void btnShowAddFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShowAddFormActionPerformed
+        AddWordForm addWordForm = new AddWordForm();
+        addWordForm.setDictionary(this);
+        addWordForm.setVisible(true);
+        this.setEnabled(false);
+    }//GEN-LAST:event_btnShowAddFormActionPerformed
 
     /**
      * @param args the command line arguments
@@ -216,8 +210,8 @@ public class Dictionary extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDeleteWord;
-    private javax.swing.JButton btnNewWord;
     private javax.swing.JButton btnSearchWord;
+    private javax.swing.JButton btnShowAddForm;
     private javax.swing.JButton btnUpdateWord;
     private javax.swing.JList<String> jList1;
     private javax.swing.JMenu jMenu1;
