@@ -42,7 +42,22 @@ public class WordDAO {
         
         try {
             conn = MyConnection.getConnection();
-//            String sql = "Select "
+            String sql = "Select SEQ, Name, Spelling, spellingSoundSrc,"
+                    + " PartsOfSpeech, ImageSrc, Meaning from Word";
+            pre = conn.prepareStatement(sql);
+            rs = pre.executeQuery();
+            while (rs.next()) {
+                WordDTO dto = new WordDTO();
+                dto.setSEQ(rs.getInt("SEQ"));
+                dto.setName(rs.getString("Name"));
+                dto.setSpelling(rs.getString("Spelling"));
+                dto.setSpellingSrc(rs.getString("SpellingSoundSrc"));
+                dto.setPartsOfSpeech(rs.getString("PartsOfSpeech"));
+                dto.setImageSrc(rs.getString("ImageSrc"));
+                dto.setMeaning(rs.getString("Meaning"));
+                result.add(dto);
+            }
+            System.out.println("----Get all word----");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -52,48 +67,48 @@ public class WordDAO {
         return result;
     }
     
-    public boolean saveNewWord(WordDTO dto) {
-        boolean result = false;
-        
-        try {
-            conn = MyConnection.getConnection();
-            conn.setAutoCommit(false);
-            String sql = "Insert into Word (Name, Spelling, SpellingSoundSrc, PartsOfSpeech, ImageSrc, Meaning) values (?,?,?,?,?,?)";
-            pre = conn.prepareStatement(sql);
-            pre.setString(1, dto.getName());
-            pre.setString(2, dto.getSpelling());
-            pre.setString(3, dto.getSpellingSrc());
-            pre.setString(4, dto.getPartsOfSpeech());
-            pre.setString(5, dto.getImageSrc());
-            pre.setString(6, dto.getMeaning());
-
-            String completeSql = pre.toString();
-            String finalSql = completeSql.substring(completeSql.indexOf(" ") + 1);
-            pre.executeUpdate(finalSql, Statement.RETURN_GENERATED_KEYS);
-            rs = pre.getGeneratedKeys();
-            rs.next();
-            int id = rs.getInt(1);
-            
-            
-            sql = "Insert into WordByGrade (Example, ExampleSoundSrc, Unit_SEQ, Word_SEQ) values (?,?,?,?)";
-            pre = conn.prepareCall(sql);
-            pre.setString(1, dto.getExample());
-            pre.setString(2, dto.getExSoundSrc());
-            pre.setInt(3, dto.getUnitSEQ());
-            pre.setInt(4, id);
-            pre.executeUpdate();
-            
-            conn.commit();
-            result = true;
-            System.out.println("----Save new Word----");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            closeConnection();
-        }
-        
-        return result;
-    }
+//    public boolean saveNewWord(WordDTO dto) {
+//        boolean result = false;
+//        
+//        try {
+//            conn = MyConnection.getConnection();
+//            conn.setAutoCommit(false);
+//            String sql = "Insert into Word (Name, Spelling, SpellingSoundSrc, PartsOfSpeech, ImageSrc, Meaning) values (?,?,?,?,?,?)";
+//            pre = conn.prepareStatement(sql);
+//            pre.setString(1, dto.getName());
+//            pre.setString(2, dto.getSpelling());
+//            pre.setString(3, dto.getSpellingSrc());
+//            pre.setString(4, dto.getPartsOfSpeech());
+//            pre.setString(5, dto.getImageSrc());
+//            pre.setString(6, dto.getMeaning());
+//
+//            String completeSql = pre.toString();
+//            String finalSql = completeSql.substring(completeSql.indexOf(" ") + 1);
+//            pre.executeUpdate(finalSql, Statement.RETURN_GENERATED_KEYS);
+//            rs = pre.getGeneratedKeys();
+//            rs.next();
+//            int id = rs.getInt(1);
+//            
+//            
+//            sql = "Insert into WordByGrade (Example, ExampleSoundSrc, Unit_SEQ, Word_SEQ) values (?,?,?,?)";
+//            pre = conn.prepareCall(sql);
+//            pre.setString(1, dto.getExample());
+//            pre.setString(2, dto.getExSoundSrc());
+//            pre.setInt(3, dto.getUnitSEQ());
+//            pre.setInt(4, id);
+//            pre.executeUpdate();
+//            
+//            conn.commit();
+//            result = true;
+//            System.out.println("----Save new Word----");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            closeConnection();
+//        }
+//        
+//        return result;
+//    }
     
     public boolean isUniqueName(String name) {
         boolean result = true;

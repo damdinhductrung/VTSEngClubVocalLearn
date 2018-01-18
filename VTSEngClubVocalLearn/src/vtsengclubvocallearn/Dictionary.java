@@ -6,22 +6,33 @@
 package vtsengclubvocallearn;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import trung.dao.WordDAO;
+import trung.dto.GradeList;
+import trung.dto.UnitList;
+import trung.dto.WordByGradeList;
 import trung.dto.WordDTO;
+import trung.dto.WordList;
 
 /**
  *
  * @author Trung
  */
 public class Dictionary extends javax.swing.JFrame {
-
-    ArrayList<WordDTO> words = new ArrayList<>();
     final JFXPanel fxPanel = new JFXPanel();
-
+    
+    final GradeList gradeList = new GradeList();
+    final UnitList  unitList  = new UnitList();
+    final WordByGradeList wordByGradeList = new WordByGradeList();
+    final WordList wordList = new WordList();
+    final DefaultListModel wordsModel = new DefaultListModel();
+    
     /**
      * Creates new form Dictionary
      */
@@ -33,16 +44,26 @@ public class Dictionary extends javax.swing.JFrame {
             public void run() {
             }
         });
+        
+        jList1.setModel(wordsModel);
+        loadAllList();
+        showWords();
     }
     
     public void showWords() {
         
+        
+        for (Map.Entry<Integer, WordDTO> entry : wordList.entrySet()) {
+            wordsModel.addElement(entry.getValue().getName());
+        }
     }
-
-    private void testInsertWord() {
-        WordDTO dto = new WordDTO(0, "g", "c", "c", "c", "c", "c", "c", "c", 1);
-        WordDAO dao = new WordDAO();
-        dao.saveNewWord(dto);
+    
+    public void loadAllList() {
+        gradeList.loadGradeList();
+        unitList.loadAllUnit();
+        wordByGradeList.loadAllWordByGrade();
+        wordList.loadAllWord();
+        System.out.println("----DATA ALL SET----");
     }
 
     /**

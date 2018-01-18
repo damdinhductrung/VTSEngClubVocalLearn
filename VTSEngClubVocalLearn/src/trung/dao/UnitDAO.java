@@ -36,6 +36,33 @@ public class UnitDAO {
         }
     }
     
+    public ArrayList<UnitDTO> getAllUnit() {
+        ArrayList<UnitDTO> result = new ArrayList<>();
+        
+        try {
+            conn = MyConnection.getConnection();
+            String sql = "Select SEQ, Number, Name, Grade_SEQ from Unit";
+            pre = conn.prepareStatement(sql);
+            rs = pre.executeQuery();
+            while (rs.next()) {
+                UnitDTO dto = new UnitDTO();
+                dto.setSEQ(rs.getInt("SEQ"));
+                dto.setNumber(rs.getInt("Number"));
+                dto.setName(rs.getString("Name"));
+                dto.setGradeSEQ(rs.getInt("Grade_SEQ"));
+                result.add(dto);
+            }
+            System.out.println("----GET ALL UNITS----");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        
+        
+        return result;
+    }
+    
     /**
      * Lấy tất cả các Unit bằng Grade SEQ
      * @param gradeSEQ: SEQ của grade
