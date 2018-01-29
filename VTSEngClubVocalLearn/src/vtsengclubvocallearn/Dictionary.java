@@ -5,17 +5,25 @@
  */
 package vtsengclubvocallearn;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.awt.Image;
+import java.io.File;
 import java.util.Map;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import trung.dao.WordDAO;
+import trung.dto.GradeDTO;
 import trung.dto.GradeList;
+import trung.dto.UnitDTO;
 import trung.dto.UnitList;
+import trung.dto.WordByGradeDTO;
 import trung.dto.WordByGradeList;
 import trung.dto.WordDTO;
 import trung.dto.WordList;
@@ -25,14 +33,15 @@ import trung.dto.WordList;
  * @author Trung
  */
 public class Dictionary extends javax.swing.JFrame {
+
     final JFXPanel fxPanel = new JFXPanel();
-    
+
     final GradeList gradeList = new GradeList();
-    final UnitList  unitList  = new UnitList();
+    final UnitList unitList = new UnitList();
     final WordByGradeList wordByGradeList = new WordByGradeList();
     final WordList wordList = new WordList();
-    final DefaultListModel wordsModel = new DefaultListModel();
-    
+    final DefaultListModel wordListModel = new DefaultListModel();
+
     /**
      * Creates new form Dictionary
      */
@@ -44,20 +53,53 @@ public class Dictionary extends javax.swing.JFrame {
             public void run() {
             }
         });
-        
-        jList1.setModel(wordsModel);
+
+        //Select 1 giá trị khác trong list
+        jlWords.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    showWordDetail();
+                }
+            }
+        });
+
+        jlWords.setModel(wordListModel);
         loadAllList();
         showWords();
     }
-    
+
+    public void showWordDetail() {
+        WordDTO wDto = wordList.get(jlWords.getSelectedValue());
+        WordByGradeDTO wbgDto = wordByGradeList.get(wDto.getSEQ());
+        UnitDTO uDto = unitList.get(wbgDto.getUnitSEQ());
+        GradeDTO gDto = gradeList.get(uDto.getGradeSEQ());
+        lbDWord.setText(wDto.getName());
+        lbDPartsOfSpeech.setText(wDto.getPartsOfSpeech());
+        lbDSpelling.setText(wDto.getSpelling());
+
+        try {
+            File imageSrc = new File(wDto.getImageSrc());
+            Image bufferImage = ImageIO.read(imageSrc);
+            ImageIcon icon = new ImageIcon(bufferImage);
+            lbImage.setSize(icon.getIconWidth(), icon.getIconHeight());
+            lbImage.setIcon(icon);
+            lbImage.updateUI();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        lbDGrade.setText("Grade: " + gradeList.get(unitList.get(wbgDto.getUnitSEQ()).getGradeSEQ()).getNumber());
+        lbDUnit.setText("Unit " + uDto.getNumber() + ": " + uDto.getName());
+        taDMeaning.setText(wDto.getMeaning());
+    }
+
     public void showWords() {
-        
-        
-        for (Map.Entry<Integer, WordDTO> entry : wordList.entrySet()) {
-            wordsModel.addElement(entry.getValue().getName());
+        for (Map.Entry<String, WordDTO> entry : wordList.entrySet()) {
+            wordListModel.addElement(entry.getKey());
         }
     }
-    
+
     public void loadAllList() {
         gradeList.loadGradeList();
         unitList.loadAllUnit();
@@ -76,14 +118,23 @@ public class Dictionary extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        lbDWord = new javax.swing.JLabel();
+        lbDPartsOfSpeech = new javax.swing.JLabel();
+        lbDSpelling = new javax.swing.JLabel();
+        btnDPlay = new javax.swing.JButton();
+        lbImage = new javax.swing.JLabel();
+        lbDGrade = new javax.swing.JLabel();
+        lbDUnit = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        taDMeaning = new javax.swing.JTextArea();
         jPanel2 = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         btnSearchWord = new javax.swing.JButton();
         btnShowAddForm = new javax.swing.JButton();
         btnUpdateWord = new javax.swing.JButton();
         btnDeleteWord = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        jlWords = new javax.swing.JList<>();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -93,15 +144,71 @@ public class Dictionary extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Meaning"));
 
+        lbDWord.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        lbDWord.setText("Word");
+
+        lbDPartsOfSpeech.setText("parts of speech");
+
+        lbDSpelling.setText("spelling");
+
+        btnDPlay.setText("Play");
+
+        lbImage.setBackground(new java.awt.Color(153, 153, 153));
+        lbImage.setBorder(new javax.swing.border.MatteBorder(null));
+        lbImage.setPreferredSize(new java.awt.Dimension(300, 300));
+
+        lbDGrade.setText("Grade");
+
+        lbDUnit.setText("Unit");
+
+        taDMeaning.setBackground(new java.awt.Color(204, 204, 204));
+        taDMeaning.setColumns(20);
+        taDMeaning.setRows(5);
+        jScrollPane2.setViewportView(taDMeaning);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 849, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lbDWord, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(lbDSpelling, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(32, 32, 32)
+                                .addComponent(btnDPlay))
+                            .addComponent(lbDPartsOfSpeech)
+                            .addComponent(lbDGrade)
+                            .addComponent(lbDUnit))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lbImage, javax.swing.GroupLayout.PREFERRED_SIZE, 450, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lbDWord, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lbDSpelling, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnDPlay))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbDPartsOfSpeech, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbDGrade)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbDUnit)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lbImage, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Word"));
@@ -119,12 +226,12 @@ public class Dictionary extends javax.swing.JFrame {
 
         btnDeleteWord.setText("Delete");
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+        jlWords.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane1.setViewportView(jList1);
+        jScrollPane1.setViewportView(jlWords);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -132,7 +239,7 @@ public class Dictionary extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                 .addGroup(jPanel2Layout.createSequentialGroup()
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                     .addComponent(btnSearchWord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGroup(jPanel2Layout.createSequentialGroup()
@@ -147,7 +254,7 @@ public class Dictionary extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSearchWord))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -175,7 +282,8 @@ public class Dictionary extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -230,17 +338,26 @@ public class Dictionary extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnDPlay;
     private javax.swing.JButton btnDeleteWord;
     private javax.swing.JButton btnSearchWord;
     private javax.swing.JButton btnShowAddForm;
     private javax.swing.JButton btnUpdateWord;
-    private javax.swing.JList<String> jList1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JList<String> jlWords;
+    private javax.swing.JLabel lbDGrade;
+    private javax.swing.JLabel lbDPartsOfSpeech;
+    private javax.swing.JLabel lbDSpelling;
+    private javax.swing.JLabel lbDUnit;
+    private javax.swing.JLabel lbDWord;
+    private javax.swing.JLabel lbImage;
+    private javax.swing.JTextArea taDMeaning;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 }

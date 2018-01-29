@@ -7,17 +7,14 @@ package trung.dto;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import trung.dao.WordDAO;
 
 /**
  *
  * @author Trung
  */
-public class WordList extends LinkedHashMap<Integer, WordDTO> {
+public class WordList extends LinkedHashMap<String, WordDTO> {
 
     public void loadAllWord() {
         WordDAO dao = new WordDAO();
@@ -26,7 +23,7 @@ public class WordList extends LinkedHashMap<Integer, WordDTO> {
         Collections.sort(list);
 
         for (WordDTO dto : list) {
-            this.put(dto.getSEQ(), dto);
+            this.put(dto.getName(), dto);
         }
 
         System.out.println("----Load all word----");

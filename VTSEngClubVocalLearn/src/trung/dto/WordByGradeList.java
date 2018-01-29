@@ -18,7 +18,7 @@ public class WordByGradeList extends HashMap<Integer, WordByGradeDTO> {
         WordByGradeDAO dao = new WordByGradeDAO();
         ArrayList<WordByGradeDTO> list = dao.getAllWordByGrade();
         for (WordByGradeDTO dto : list) {
-            this.put(dto.getSEQ(), dto);
+            this.put(dto.getWordSEQ(), dto);
         }
         System.out.println("----Load all word by grade----");
     }

@@ -26,6 +26,7 @@ import trung.dao.UnitDAO;
 import trung.dao.WordDAO;
 import trung.dto.GradeDTO;
 import trung.dto.UnitDTO;
+import trung.dto.WordByGradeDTO;
 import trung.dto.WordDTO;
 import util.MyUtil;
 
@@ -77,25 +78,26 @@ public class AddWordForm extends javax.swing.JFrame {
         this.dic = parent;
     }
 
-//    public void saveWord() {
-//        WordDTO dto = new WordDTO();
-//        WordDAO dao = new WordDAO();
-//        if (checkInput()) {
-//            dto.setName(txtWord.getText());
-//            dto.setSpelling(txtSpelling.getText());
-//            dto.setSpellingSrc(soundDes.getPath());
-//            dto.setPartsOfSpeech(cbPartsOfSpeech.getSelectedItem().toString());
-//            dto.setImageSrc(imageDes.getPath());
-//            dto.setMeaning(taMeaning.getText());
-//            dto.setExample(taExample.getText());
-//            dto.setExSoundSrc(exDes.getPath());
-//            dto.setUnitSEQ(units.get(cbUnit.getSelectedIndex()).getSEQ());
-//            dao.saveNewWord(dto);
-//            JOptionPane.showMessageDialog(this, "Input successful");
-//        } else {
-//            JOptionPane.showMessageDialog(this, inputErrors, "Input Error", JOptionPane.ERROR_MESSAGE);
-//        }
-//    }
+    public void saveWord() {
+        WordDTO wDto = new WordDTO();
+        WordByGradeDTO wbgDto = new WordByGradeDTO();
+        WordDAO wDao = new WordDAO();
+        if (checkInput()) {
+            wDto.setName(txtWord.getText());
+            wDto.setSpelling(txtSpelling.getText());
+            wDto.setSpellingSrc(soundDes.getPath());
+            wDto.setPartsOfSpeech(cbPartsOfSpeech.getSelectedItem().toString());
+            wDto.setImageSrc(imageDes.getPath());
+            wDto.setMeaning(taMeaning.getText());
+            wbgDto.setExample(taExample.getText());
+            wbgDto.setExampleSrc(exDes.getPath());
+            wbgDto.setUnitSEQ(units.get(cbUnit.getSelectedIndex()).getSEQ());
+            wDao.saveNewWord(wDto, wbgDto);
+            JOptionPane.showMessageDialog(this, "Input successful");
+        } else {
+            JOptionPane.showMessageDialog(this, inputErrors, "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     private void setSound() {
 
@@ -157,10 +159,10 @@ public class AddWordForm extends javax.swing.JFrame {
             Image originImage = ImageIO.read(image);
 
             //Resize hình theo đúng tỉ lệ, lấy chiều rộng cho chiều dài 600
-            Double newWeight = 600.0 * ((double) originImage.getHeight(this) / (double) originImage.getWidth(this));
+            Double newWeight = 300.0 / ((double) originImage.getHeight(this) / (double) originImage.getWidth(this));
 
             //Resize hình
-            BufferedImage resizeImage = MyUtil.createResizedCopy(originImage, 600, newWeight.intValue(), true);
+            BufferedImage resizeImage = MyUtil.createResizedCopy(originImage, newWeight.intValue(), 300, true);
 
             //Lưu hình vào file mới
             ImageIO.write(resizeImage, "jpg", imageDes);
@@ -635,8 +637,8 @@ public class AddWordForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnExPlayActionPerformed
 
     private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
-//        saveWord();
-//        this.dispose();
+        saveWord();
+        this.dispose();
     }//GEN-LAST:event_btnOkActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed

@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import trung.dto.WordByGradeDTO;
 import trung.dto.WordDTO;
 
 /**
@@ -67,48 +68,48 @@ public class WordDAO {
         return result;
     }
     
-//    public boolean saveNewWord(WordDTO dto) {
-//        boolean result = false;
+    public boolean saveNewWord(WordDTO wDto, WordByGradeDTO wbgDto) {
+        boolean result = false;
 //        
-//        try {
-//            conn = MyConnection.getConnection();
-//            conn.setAutoCommit(false);
-//            String sql = "Insert into Word (Name, Spelling, SpellingSoundSrc, PartsOfSpeech, ImageSrc, Meaning) values (?,?,?,?,?,?)";
-//            pre = conn.prepareStatement(sql);
-//            pre.setString(1, dto.getName());
-//            pre.setString(2, dto.getSpelling());
-//            pre.setString(3, dto.getSpellingSrc());
-//            pre.setString(4, dto.getPartsOfSpeech());
-//            pre.setString(5, dto.getImageSrc());
-//            pre.setString(6, dto.getMeaning());
-//
-//            String completeSql = pre.toString();
-//            String finalSql = completeSql.substring(completeSql.indexOf(" ") + 1);
-//            pre.executeUpdate(finalSql, Statement.RETURN_GENERATED_KEYS);
-//            rs = pre.getGeneratedKeys();
-//            rs.next();
-//            int id = rs.getInt(1);
-//            
-//            
-//            sql = "Insert into WordByGrade (Example, ExampleSoundSrc, Unit_SEQ, Word_SEQ) values (?,?,?,?)";
-//            pre = conn.prepareCall(sql);
-//            pre.setString(1, dto.getExample());
-//            pre.setString(2, dto.getExSoundSrc());
-//            pre.setInt(3, dto.getUnitSEQ());
-//            pre.setInt(4, id);
-//            pre.executeUpdate();
-//            
-//            conn.commit();
-//            result = true;
-//            System.out.println("----Save new Word----");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            closeConnection();
-//        }
+        try {
+            conn = MyConnection.getConnection();
+            conn.setAutoCommit(false);
+            String sql = "Insert into Word (Name, Spelling, SpellingSoundSrc, PartsOfSpeech, ImageSrc, Meaning) values (?,?,?,?,?,?)";
+            pre = conn.prepareStatement(sql);
+            pre.setString(1, wDto.getName());
+            pre.setString(2, wDto.getSpelling());
+            pre.setString(3, wDto.getSpellingSrc());
+            pre.setString(4, wDto.getPartsOfSpeech());
+            pre.setString(5, wDto.getImageSrc());
+            pre.setString(6, wDto.getMeaning());
+
+            String completeSql = pre.toString();
+            String finalSql = completeSql.substring(completeSql.indexOf(" ") + 1);
+            pre.executeUpdate(finalSql, Statement.RETURN_GENERATED_KEYS);
+            rs = pre.getGeneratedKeys();
+            rs.next();
+            int id = rs.getInt(1);
+            
+            
+            sql = "Insert into WordByGrade (Example, ExampleSoundSrc, Unit_SEQ, Word_SEQ) values (?,?,?,?)";
+            pre = conn.prepareStatement(sql);
+            pre.setString(1, wbgDto.getExample());
+            pre.setString(2, wbgDto.getExampleSrc());
+            pre.setInt(3, wbgDto.getUnitSEQ());
+            pre.setInt(4, id);
+            pre.executeUpdate();
+            
+            conn.commit();
+            result = true;
+            System.out.println("----Save new Word----");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
 //        
-//        return result;
-//    }
+        return result;
+    }
     
     public boolean isUniqueName(String name) {
         boolean result = true;
