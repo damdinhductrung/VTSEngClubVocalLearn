@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package trung.dto;
+package trung.entities;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import trung.dao.WordDAO;
+import trung.dto.WordDTO;
 
 /**
  *

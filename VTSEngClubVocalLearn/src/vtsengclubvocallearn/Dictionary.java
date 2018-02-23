@@ -13,20 +13,17 @@ import javafx.embed.swing.JFXPanel;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import trung.dao.WordDAO;
 import trung.dto.GradeDTO;
-import trung.dto.GradeList;
+import trung.entities.GradeList;
 import trung.dto.UnitDTO;
-import trung.dto.UnitList;
+import trung.entities.UnitList;
 import trung.dto.WordByGradeDTO;
-import trung.dto.WordByGradeList;
+import trung.entities.WordByGradeList;
 import trung.dto.WordDTO;
-import trung.dto.WordList;
+import trung.entities.WordList;
 
 /**
  *
@@ -35,11 +32,7 @@ import trung.dto.WordList;
 public class Dictionary extends javax.swing.JFrame {
 
     final JFXPanel fxPanel = new JFXPanel();
-
-    final GradeList gradeList = new GradeList();
-    final UnitList unitList = new UnitList();
-    final WordByGradeList wordByGradeList = new WordByGradeList();
-    final WordList wordList = new WordList();
+    
     final DefaultListModel wordListModel = new DefaultListModel();
 
     /**
@@ -48,13 +41,24 @@ public class Dictionary extends javax.swing.JFrame {
     public Dictionary() {
         initComponents();
 
+        startup();
+    }
+    
+    public void startup() {
+        //Thiet lap moi truong fx
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
             }
         });
+        
+        //Load all list
+        loadAllList();
+        
+        //Set jlWord model
+        jlWords.setModel(wordListModel);
 
-        //Select 1 giá trị khác trong list
+        //Set jlWords listener
         jlWords.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -63,17 +67,13 @@ public class Dictionary extends javax.swing.JFrame {
                 }
             }
         });
-
-        jlWords.setModel(wordListModel);
-        loadAllList();
-        showWords();
     }
 
     public void showWordDetail() {
-        WordDTO wDto = wordList.get(jlWords.getSelectedValue());
-        WordByGradeDTO wbgDto = wordByGradeList.get(wDto.getSEQ());
-        UnitDTO uDto = unitList.get(wbgDto.getUnitSEQ());
-        GradeDTO gDto = gradeList.get(uDto.getGradeSEQ());
+        WordDTO wDto = VTSEngClubVocalLearn.WORD_LIST.get(jlWords.getSelectedValue());
+        WordByGradeDTO wbgDto = VTSEngClubVocalLearn.WBG_LIST.get(wDto.getSEQ());
+        UnitDTO uDto = VTSEngClubVocalLearn.UNIT_LIST.get(wbgDto.getUnitSEQ());
+        GradeDTO gDto = VTSEngClubVocalLearn.GRADE_LIST.get(uDto.getGradeSEQ());
         lbDWord.setText(wDto.getName());
         lbDPartsOfSpeech.setText(wDto.getPartsOfSpeech());
         lbDSpelling.setText(wDto.getSpelling());
@@ -88,24 +88,18 @@ public class Dictionary extends javax.swing.JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        lbDGrade.setText("Grade: " + gradeList.get(unitList.get(wbgDto.getUnitSEQ()).getGradeSEQ()).getNumber());
+
+        lbDGrade.setText("Grade: " + VTSEngClubVocalLearn.GRADE_LIST.get(VTSEngClubVocalLearn.UNIT_LIST.get(wbgDto.getUnitSEQ()).getGradeSEQ()).getNumber());
         lbDUnit.setText("Unit " + uDto.getNumber() + ": " + uDto.getName());
         taDMeaning.setText(wDto.getMeaning());
     }
 
-    public void showWords() {
-        for (Map.Entry<String, WordDTO> entry : wordList.entrySet()) {
+    public void loadAllList() {
+        wordListModel.removeAllElements();
+        
+        for (Map.Entry<String, WordDTO> entry : VTSEngClubVocalLearn.WORD_LIST.entrySet()) {
             wordListModel.addElement(entry.getKey());
         }
-    }
-
-    public void loadAllList() {
-        gradeList.loadGradeList();
-        unitList.loadAllUnit();
-        wordByGradeList.loadAllWordByGrade();
-        wordList.loadAllWord();
-        System.out.println("----DATA ALL SET----");
     }
 
     /**
@@ -184,16 +178,16 @@ public class Dictionary extends javax.swing.JFrame {
                             .addComponent(lbDGrade)
                             .addComponent(lbDUnit))
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lbImage, javax.swing.GroupLayout.PREFERRED_SIZE, 450, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
                         .addComponent(lbDWord, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -237,18 +231,17 @@ public class Dictionary extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                .addGroup(jPanel2Layout.createSequentialGroup()
-                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(btnSearchWord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGroup(jPanel2Layout.createSequentialGroup()
-                    .addComponent(btnShowAddForm, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(btnUpdateWord)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(btnDeleteWord, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)))
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(btnShowAddForm, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnUpdateWord, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnDeleteWord, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(jScrollPane1)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSearchWord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

@@ -6,21 +6,40 @@
 package vtsengclubvocallearn;
 
 import connection.MyConnection;
+import javax.swing.JFrame;
 import trung.dao.WordDAO;
+import trung.entities.GradeList;
+import trung.entities.UnitList;
+import trung.entities.WordByGradeList;
+import trung.entities.WordList;
 
 /**
  *
  * @author Trung
  */
-public class VTSEngClubVocalLearn {
+public final class VTSEngClubVocalLearn {
 
-    /**
-     * @param args the command line arguments
-     */
+    public static final GradeList GRADE_LIST = new GradeList();
+    public static final UnitList  UNIT_LIST  = new UnitList();
+    public static final WordByGradeList WBG_LIST = new WordByGradeList();
+    public static final WordList  WORD_LIST = new WordList();
+    
     public static void main(String[] args) {
-        WordDAO dao = new WordDAO();
-        dao.isUniqueName("b");
-        dao.isUniqueName("lalalando");
+        loadData();
+        
+        TestMenu testMenu = new TestMenu();
+        testMenu.setVisible(true);
+
+//        Dictionary dic = new Dictionary();
+//        dic.setVisible(true);
+    }
+    
+    public static void loadData() {
+        GRADE_LIST.loadGradeList();
+        UNIT_LIST.loadAllUnit();
+        WBG_LIST.loadAllWordByGrade();
+        WORD_LIST.loadAllWord();
+        System.out.println("----Data all set----");
     }
     
 }

@@ -3,11 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package trung.dto;
+package trung.entities;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import trung.dao.UnitDAO;
+import trung.dto.UnitDTO;
 
 /**
  *
@@ -21,5 +23,18 @@ public class UnitList extends HashMap<Integer, UnitDTO> {
             this.put(dto.getSEQ(), dto);
         }
         System.out.println("----Load all unit----");
+    }
+    
+    public ArrayList<UnitDTO> getUnitsByGradeSEQ(int seq) {
+        ArrayList<UnitDTO> result = new ArrayList<>();
+        
+        for (Map.Entry<Integer, UnitDTO> entry : this.entrySet()) {
+            UnitDTO dto = entry.getValue();
+            if (dto.getGradeSEQ() == seq) {
+                result.add(dto);
+            }
+        }
+        
+        return result;
     }
 }

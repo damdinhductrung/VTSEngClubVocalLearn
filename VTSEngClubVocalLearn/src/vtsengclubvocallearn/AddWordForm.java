@@ -647,6 +647,7 @@ public class AddWordForm extends javax.swing.JFrame {
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         dic.setEnabled(true);
+        dic.loadAllList();
     }//GEN-LAST:event_formWindowClosed
 
     /**

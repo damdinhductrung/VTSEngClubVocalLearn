@@ -19,10 +19,11 @@ import trung.dto.WordDTO;
  * @author Trung
  */
 public class WordDAO {
+
     private Connection conn;
     private PreparedStatement pre;
     private ResultSet rs;
-    
+
     private void closeConnection() {
         try {
             if (rs != null) {
@@ -37,10 +38,10 @@ public class WordDAO {
         } catch (Exception e) {
         }
     }
-    
+
     public ArrayList<WordDTO> getAllWord() {
         ArrayList<WordDTO> result = new ArrayList<>();
-        
+
         try {
             conn = MyConnection.getConnection();
             String sql = "Select SEQ, Name, Spelling, spellingSoundSrc,"
@@ -64,10 +65,10 @@ public class WordDAO {
         } finally {
             closeConnection();
         }
-        
+
         return result;
     }
-    
+
     public boolean saveNewWord(WordDTO wDto, WordByGradeDTO wbgDto) {
         boolean result = false;
 //        
@@ -89,8 +90,7 @@ public class WordDAO {
             rs = pre.getGeneratedKeys();
             rs.next();
             int id = rs.getInt(1);
-            
-            
+
             sql = "Insert into WordByGrade (Example, ExampleSoundSrc, Unit_SEQ, Word_SEQ) values (?,?,?,?)";
             pre = conn.prepareStatement(sql);
             pre.setString(1, wbgDto.getExample());
@@ -98,7 +98,7 @@ public class WordDAO {
             pre.setInt(3, wbgDto.getUnitSEQ());
             pre.setInt(4, id);
             pre.executeUpdate();
-            
+
             conn.commit();
             result = true;
             System.out.println("----Save new Word----");
@@ -110,13 +110,57 @@ public class WordDAO {
 //        
         return result;
     }
-    
-    public boolean isUniqueName(String name) {
-        boolean result = true;
-        
+
+    public ArrayList<WordDTO> getWordsByUnitSEQ(int seq) {
+        ArrayList<WordDTO> result = new ArrayList<>();
+
         try {
             conn = MyConnection.getConnection();
-            String sql = "Select `SEQ` from `word` where `Name` = ?";
+            String sql = "select Word.SEQ as `SEQ`, "
+                    + "Word.Name as `Word`, "
+                    + "Word.PartsOfSpeech as `PartsOfSpeech`, "
+                    + "Word.Spelling as `Spelling`, "
+                    + "Word.SpellingSoundSrc as `SpellingSrc`, "
+                    + "Word.ImageSrc as `ImageSrc`, "
+                    + "Word.Meaning as `Meaning` \n"
+                    + "from WordByGrade\n"
+                    + "inner join Unit\n"
+                    + "	on WordByGrade.Unit_SEQ = Unit.SEQ \n"
+                    + "inner join Word\n"
+                    + "	on WordByGrade.Word_SEQ = Word.SEQ \n"
+                    + "where WordByGrade.Unit_SEQ = ?";
+            pre = conn.prepareStatement(sql);
+            pre.setInt(1, seq);
+            
+            rs = pre.executeQuery();
+            while (rs.next()) {
+                WordDTO dto = new WordDTO();
+                dto.setSEQ(rs.getInt("SEQ"));
+                dto.setName(rs.getString("Word"));
+                dto.setPartsOfSpeech(rs.getString("PartsOfSpeech"));
+                dto.setSpelling(rs.getString("Spelling"));
+                dto.setImageSrc(rs.getString("ImageSrc"));
+                dto.setMeaning(rs.getString("Meaning"));
+                
+                result.add(dto);
+            }
+            
+            System.out.println("----Load word of Unit_SEQ = " + seq + "----");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+
+        return result;
+    }
+
+    public boolean isUniqueName(String name) {
+        boolean result = true;
+
+        try {
+            conn = MyConnection.getConnection();
+            String sql = "Select `SEQ` from `Word` where `Name` = ?";
             pre = conn.prepareStatement(sql);
             pre.setString(1, name);
             rs = pre.executeQuery();
@@ -126,7 +170,7 @@ public class WordDAO {
         } finally {
             closeConnection();
         }
-        
+
         return result;
     }
 }
