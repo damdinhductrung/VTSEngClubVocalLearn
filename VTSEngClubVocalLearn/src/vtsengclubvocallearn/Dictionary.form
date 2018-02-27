@@ -210,7 +210,7 @@
               <Group type="102" attributes="0">
                   <Component id="btnShowAddForm" min="-2" pref="66" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnUpdateWord" pref="65" max="32767" attributes="0"/>
+                  <Component id="btnUpdateWord" pref="0" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnDeleteWord" min="-2" pref="85" max="-2" attributes="0"/>
               </Group>

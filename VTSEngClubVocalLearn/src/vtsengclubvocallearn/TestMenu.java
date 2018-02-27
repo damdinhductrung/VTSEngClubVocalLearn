@@ -5,10 +5,13 @@
  */
 package vtsengclubvocallearn;
 
+import java.awt.Checkbox;
+import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
+import javax.swing.JCheckBox;
 import trung.dao.GradeDAO;
 import trung.dao.UnitDAO;
 import trung.dao.WordDAO;
@@ -21,28 +24,26 @@ import trung.dto.WordDTO;
  * @author trung
  */
 public class TestMenu extends javax.swing.JFrame {
-    
+
     GradeDAO gradeDao = new GradeDAO();
     UnitDAO unitDao = new UnitDAO();
     WordDAO wordDao = new WordDAO();
-    ArrayList<GradeDTO> grades = new ArrayList<>();
-    ArrayList<UnitDTO> units = new ArrayList<>();
+
     ArrayList<WordDTO> words = new ArrayList<>();
-    
-    DefaultListModel deselectWordsListModel = new DefaultListModel();
-    DefaultListModel selectedWordsListModel = new DefaultListModel();
-    
-    
+    ArrayList<UnitDTO> units = new ArrayList<>();
+    public ArrayList<WordDTO> selectedWord = new ArrayList<>();
+    ArrayList<JCheckBox> checkBoxGroup = new ArrayList<>();
+
     VTSEngClubVocalLearn main;
+
     /**
      * Creates new form TestMenu
      */
     public TestMenu() {
         initComponents();
         startup();
-        
     }
-    
+
     public void startup() {
         //Set cbGrade listener
         cbGrades.addItemListener(new ItemListener() {
@@ -50,52 +51,62 @@ public class TestMenu extends javax.swing.JFrame {
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     removeAllWord();
-                    loadUnitsByGradeSEQ(grades.get(cbGrades.getSelectedIndex()).getSEQ());
+                    loadUnitsByGradeSEQ(VTSEngClubVocalLearn.GRADE_LIST.get(cbGrades.getSelectedIndex()).getSEQ());
                 }
             }
         });
-        
+
         //Set cbUnits listener
         cbUnits.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     removeAllWord();
-                    loadWordsByUnitsSEQ(units.get(cbUnits.getSelectedIndex()).getSEQ());
+                    loadWordCheckBox(units.get(cbUnits.getSelectedIndex()).getSEQ());
                 }
             }
         });
-        
-        //Set deselect list
-        jlDeselectWords.setModel(deselectWordsListModel);
-        
-        //Set selected list
-        jlSelectedWords.setModel(selectedWordsListModel);
-        
+
         //Load cbGrade
         cbGrades.removeAllItems();
-        grades = VTSEngClubVocalLearn.GRADE_LIST.getAllGrades();
-        for (GradeDTO dto : grades) {
+        for (GradeDTO dto : VTSEngClubVocalLearn.GRADE_LIST) {
             cbGrades.addItem("Grade: " + dto.getNumber());
         }
     }
     
-    public void removeAllWord() {
-        deselectWordsListModel.removeAllElements();
-        selectedWordsListModel.removeAllElements();
-    }
-    
-    public void loadWordsByUnitsSEQ(int seq) {
-        words = wordDao.getWordsByUnitSEQ(seq);
-        
-        for (WordDTO dto : words) {
-            deselectWordsListModel.addElement(dto.getName());
+    //get selected words
+    public void getSelectedWords() {
+        for (int i = 0; i < jpWord.getComponentCount(); i++) {
+            JCheckBox cb = (JCheckBox) jpWord.getComponent(i);
+            if (cb.isSelected()) {
+                selectedWord.add(words.get(i));
+            }
         }
     }
-    
+
+    //Load word checkbox
+    public void loadWordCheckBox(int seq) {
+        words = VTSEngClubVocalLearn.WORD_LIST.getWordsByUnitSEQ(seq, VTSEngClubVocalLearn.WBG_LIST);
+        
+        jpWord.setLayout(new GridLayout(words.size(), 1));
+        
+        checkBoxGroup.clear();
+        
+        for (WordDTO dto : words) {
+            JCheckBox cb = new JCheckBox(dto.getName());
+            checkBoxGroup.add(cb);
+            jpWord.add(cb);
+        }
+    }
+
+    public void removeAllWord() {
+        jpWord.removeAll();
+        jpWord.updateUI();
+    }
+
     public void loadUnitsByGradeSEQ(int seq) {
         cbUnits.removeAllItems();
-        
+
         units = VTSEngClubVocalLearn.UNIT_LIST.getUnitsByGradeSEQ(seq);
         for (UnitDTO dto : units) {
             cbUnits.addItem("Unit " + dto.getNumber() + ": " + dto.getName());
@@ -111,38 +122,37 @@ public class TestMenu extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jlDeselectWords = new javax.swing.JList<>();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jlSelectedWords = new javax.swing.JList<>();
-        btnDeselect = new javax.swing.JButton();
-        btnSelect = new javax.swing.JButton();
         cbGrades = new javax.swing.JComboBox<>();
         cbUnits = new javax.swing.JComboBox<>();
+        jspWord = new javax.swing.JScrollPane();
+        jpWord = new javax.swing.JPanel();
+        btnStart = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jlDeselectWords.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane1.setViewportView(jlDeselectWords);
-
-        jlSelectedWords.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane2.setViewportView(jlSelectedWords);
-
-        btnDeselect.setText("<<<");
-
-        btnSelect.setText(">>>");
 
         cbGrades.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         cbUnits.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        javax.swing.GroupLayout jpWordLayout = new javax.swing.GroupLayout(jpWord);
+        jpWord.setLayout(jpWordLayout);
+        jpWordLayout.setHorizontalGroup(
+            jpWordLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 513, Short.MAX_VALUE)
+        );
+        jpWordLayout.setVerticalGroup(
+            jpWordLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 370, Short.MAX_VALUE)
+        );
+
+        jspWord.setViewportView(jpWord);
+
+        btnStart.setText("Start");
+        btnStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStartActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -151,18 +161,14 @@ public class TestMenu extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 354, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnDeselect, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE))
+                    .addComponent(jspWord)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(cbGrades, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cbUnits, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(cbUnits, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnStart)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -173,22 +179,22 @@ public class TestMenu extends javax.swing.JFrame {
                     .addComponent(cbGrades, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbUnits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 92, Short.MAX_VALUE)
-                        .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnDeselect, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(118, 118, 118))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1))
-                        .addContainerGap())))
+                .addComponent(jspWord, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnStart)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
+        this.setEnabled(false);
+        
+        
+        Test test = new Test();
+        test.setVisible(true);
+    }//GEN-LAST:event_btnStartActionPerformed
 
     /**
      * @param args the command line arguments
@@ -226,13 +232,10 @@ public class TestMenu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnDeselect;
-    private javax.swing.JButton btnSelect;
+    private javax.swing.JButton btnStart;
     private javax.swing.JComboBox<String> cbGrades;
     private javax.swing.JComboBox<String> cbUnits;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JList<String> jlDeselectWords;
-    private javax.swing.JList<String> jlSelectedWords;
+    private javax.swing.JPanel jpWord;
+    private javax.swing.JScrollPane jspWord;
     // End of variables declaration//GEN-END:variables
 }

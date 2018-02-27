@@ -15,12 +15,12 @@ import trung.dto.UnitDTO;
  *
  * @author Trung
  */
-public class UnitList extends HashMap<Integer, UnitDTO> {
+public class UnitList extends ArrayList<UnitDTO> {
     public void loadAllUnit() {
         UnitDAO dao = new UnitDAO();
         ArrayList<UnitDTO> list = dao.getAllUnit();
         for (UnitDTO dto : list) {
-            this.put(dto.getSEQ(), dto);
+            this.add(dto);
         }
         System.out.println("----Load all unit----");
     }
@@ -28,10 +28,22 @@ public class UnitList extends HashMap<Integer, UnitDTO> {
     public ArrayList<UnitDTO> getUnitsByGradeSEQ(int seq) {
         ArrayList<UnitDTO> result = new ArrayList<>();
         
-        for (Map.Entry<Integer, UnitDTO> entry : this.entrySet()) {
-            UnitDTO dto = entry.getValue();
+        for (UnitDTO dto : this) {
             if (dto.getGradeSEQ() == seq) {
                 result.add(dto);
+            }
+        }
+        
+        return result;
+    }
+    
+    public UnitDTO getUnitBySEQ(int seq) {
+        UnitDTO result = null;
+        
+        for (UnitDTO dto : this) {
+            if (dto.getSEQ() == seq) {
+                result = dto;
+                break;
             }
         }
         

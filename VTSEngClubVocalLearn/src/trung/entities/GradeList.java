@@ -15,22 +15,25 @@ import trung.dto.GradeDTO;
  *
  * @author Trung
  */
-public final class GradeList extends HashMap<Integer, GradeDTO> {    
+public final class GradeList extends ArrayList<GradeDTO> {    
     
     public void loadGradeList() {
         GradeDAO dao = new GradeDAO();
         ArrayList<GradeDTO> list = dao.getAllGrade();
         for (GradeDTO dto : list) {
-            this.put(dto.getSEQ(), dto);
+            this.add(dto);
         }
         System.out.println("----Load all grade----");
     }
     
-    public ArrayList<GradeDTO> getAllGrades() {
-        ArrayList<GradeDTO> result = new ArrayList<>();
+    public GradeDTO getGradeBySEQ(int seq) {
+        GradeDTO result = null;
         
-        for (Map.Entry<Integer, GradeDTO> entry : this.entrySet()) {
-            result.add(entry.getValue());
+        for (GradeDTO dto : this) {
+            if (dto.getSEQ() == seq) {
+                result = dto;
+                break;
+            }
         }
         
         return result;

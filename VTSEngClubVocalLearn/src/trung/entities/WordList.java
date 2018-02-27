@@ -9,24 +9,52 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import trung.dao.WordDAO;
+import trung.dto.WordByGradeDTO;
 import trung.dto.WordDTO;
 
 /**
  *
  * @author Trung
  */
-public class WordList extends LinkedHashMap<String, WordDTO> {
+public class WordList extends ArrayList<WordDTO> {
 
     public void loadAllWord() {
         WordDAO dao = new WordDAO();
         ArrayList<WordDTO> list = dao.getAllWord();
 
+        //Sắp xếp theo alphabel
         Collections.sort(list);
 
         for (WordDTO dto : list) {
-            this.put(dto.getName(), dto);
+            this.add(dto);
         }
 
         System.out.println("----Load all word----");
+    }
+    
+    public boolean saveNewWord(WordDTO wDto, WordByGradeDTO wbgDto) {
+        boolean result = false;
+        WordDAO dao = new WordDAO();
+        
+        if (dao.saveNewWord(wDto, wbgDto)) 
+            result = true;
+        
+        return result;
+    }
+    
+    public ArrayList<WordDTO> getWordsByUnitSEQ(int seq, WordByGradeList wbgList) {
+        ArrayList<WordDTO> result = new ArrayList<>();
+        
+        for (WordByGradeDTO wbgDto : wbgList) {
+            if (wbgDto.getUnitSEQ() == seq) {
+                for (WordDTO wDto : this) {
+                    if (wDto.getSEQ() == wbgDto.getWordSEQ()) {
+                        result.add(wDto);
+                    }
+                }
+            }
+        }
+        
+        return result;
     }
 }

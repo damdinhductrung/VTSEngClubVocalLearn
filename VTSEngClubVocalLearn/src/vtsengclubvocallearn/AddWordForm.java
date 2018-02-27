@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javax.imageio.ImageIO;
@@ -21,8 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import trung.dao.GradeDAO;
-import trung.dao.UnitDAO;
 import trung.dao.WordDAO;
 import trung.dto.GradeDTO;
 import trung.dto.UnitDTO;
@@ -47,11 +46,6 @@ public class AddWordForm extends javax.swing.JFrame {
     JPanel jpImage;
     File imageDes, soundDes, exDes, preSound;
 
-    GradeDAO gradeDao = new GradeDAO();
-    UnitDAO unitDao = new UnitDAO();
-    ArrayList<GradeDTO> grades = new ArrayList<>();
-    ArrayList<UnitDTO> units = new ArrayList<>();
-
     String inputErrors = "";
 
     /**
@@ -61,16 +55,16 @@ public class AddWordForm extends javax.swing.JFrame {
         initComponents();
         firstStartup();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        
     }
 
     public void firstStartup() {
         //Tạo loại file đc chọn cho file choosen
         fcImage.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "png"));
         fcSound.setFileFilter(new FileNameExtensionFilter("Sound files", "MP3", "wav"));
-
-        //Lấy dữ liệu grade
+        
+        //Load grades
         loadGrades();
+
 
     }
     
@@ -91,8 +85,9 @@ public class AddWordForm extends javax.swing.JFrame {
             wDto.setMeaning(taMeaning.getText());
             wbgDto.setExample(taExample.getText());
             wbgDto.setExampleSrc(exDes.getPath());
-            wbgDto.setUnitSEQ(units.get(cbUnit.getSelectedIndex()).getSEQ());
-            wDao.saveNewWord(wDto, wbgDto);
+            wbgDto.setUnitSEQ(VTSEngClubVocalLearn.UNIT_LIST.get(cbUnit.getSelectedIndex()).getSEQ());
+            
+            VTSEngClubVocalLearn.WORD_LIST.saveNewWord(wDto, wbgDto);
             JOptionPane.showMessageDialog(this, "Input successful");
         } else {
             JOptionPane.showMessageDialog(this, inputErrors, "Input Error", JOptionPane.ERROR_MESSAGE);
@@ -190,18 +185,9 @@ public class AddWordForm extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, jpImage);
     }
 
-    private void loadGrades() {
-        grades = gradeDao.getAllGrade();
-        cbGrade.removeAllItems();
-        for (GradeDTO dto : grades) {
-            cbGrade.addItem("Grade " + dto.getNumber());
-        }
-    }
-
     private void loadUnitByGradeSEQ(int gradeSEQ) {
         cbUnit.removeAllItems();
-        units = unitDao.getAllUnitByGradeSEQ(gradeSEQ);
-        for (UnitDTO dto : units) {
+        for (UnitDTO dto : VTSEngClubVocalLearn.UNIT_LIST.getUnitsByGradeSEQ(gradeSEQ)) {
             cbUnit.addItem("Unit " + dto.getNumber() + ": " + dto.getName());
         }
     }
@@ -309,6 +295,14 @@ public class AddWordForm extends javax.swing.JFrame {
 //        taError.setText(inputErrors);
         return result;
     }
+    
+    private void loadGrades() {
+        cbGrade.removeAllItems();
+        for (GradeDTO dto : VTSEngClubVocalLearn.GRADE_LIST) {
+            cbGrade.addItem(dto.getNumber() + "");
+        }
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -620,7 +614,7 @@ public class AddWordForm extends javax.swing.JFrame {
 
     private void cbGradeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbGradeItemStateChanged
         if (cbGrade.getSelectedIndex() > -1) {
-            loadUnitByGradeSEQ(grades.get(cbGrade.getSelectedIndex()).getSEQ());
+            loadUnitByGradeSEQ(VTSEngClubVocalLearn.GRADE_LIST.get(cbGrade.getSelectedIndex()).getSEQ());
         }
     }//GEN-LAST:event_cbGradeItemStateChanged
 

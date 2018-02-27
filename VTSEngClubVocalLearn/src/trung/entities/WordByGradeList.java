@@ -14,13 +14,26 @@ import trung.dto.WordByGradeDTO;
  *
  * @author Trung
  */
-public class WordByGradeList extends HashMap<Integer, WordByGradeDTO> {
+public class WordByGradeList extends ArrayList<WordByGradeDTO> {
     public void loadAllWordByGrade() {
         WordByGradeDAO dao = new WordByGradeDAO();
         ArrayList<WordByGradeDTO> list = dao.getAllWordByGrade();
         for (WordByGradeDTO dto : list) {
-            this.put(dto.getWordSEQ(), dto);
+            this.add(dto);
         }
         System.out.println("----Load all word by grade----");
+    }
+    
+    public WordByGradeDTO getWBGByWordSEQ(int seq) {
+        WordByGradeDTO result = null;
+        
+        for (WordByGradeDTO dto : this) {
+            if (dto.getWordSEQ() == seq) {
+                result = dto;
+                break;
+            }
+        }
+        
+        return result;
     }
 }

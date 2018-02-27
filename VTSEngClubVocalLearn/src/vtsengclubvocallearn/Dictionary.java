@@ -70,10 +70,10 @@ public class Dictionary extends javax.swing.JFrame {
     }
 
     public void showWordDetail() {
-        WordDTO wDto = VTSEngClubVocalLearn.WORD_LIST.get(jlWords.getSelectedValue());
-        WordByGradeDTO wbgDto = VTSEngClubVocalLearn.WBG_LIST.get(wDto.getSEQ());
-        UnitDTO uDto = VTSEngClubVocalLearn.UNIT_LIST.get(wbgDto.getUnitSEQ());
-        GradeDTO gDto = VTSEngClubVocalLearn.GRADE_LIST.get(uDto.getGradeSEQ());
+        WordDTO wDto = VTSEngClubVocalLearn.WORD_LIST.get(jlWords.getSelectedIndex());
+        WordByGradeDTO wbgDto = VTSEngClubVocalLearn.WBG_LIST.getWBGByWordSEQ(wDto.getSEQ());
+        UnitDTO uDto = VTSEngClubVocalLearn.UNIT_LIST.getUnitBySEQ(wbgDto.getUnitSEQ());
+        GradeDTO gDto = VTSEngClubVocalLearn.GRADE_LIST.getGradeBySEQ(uDto.getGradeSEQ());
         lbDWord.setText(wDto.getName());
         lbDPartsOfSpeech.setText(wDto.getPartsOfSpeech());
         lbDSpelling.setText(wDto.getSpelling());
@@ -97,8 +97,8 @@ public class Dictionary extends javax.swing.JFrame {
     public void loadAllList() {
         wordListModel.removeAllElements();
         
-        for (Map.Entry<String, WordDTO> entry : VTSEngClubVocalLearn.WORD_LIST.entrySet()) {
-            wordListModel.addElement(entry.getKey());
+        for (WordDTO dto : VTSEngClubVocalLearn.WORD_LIST) {
+            wordListModel.addElement(dto.getName());
         }
     }
 
