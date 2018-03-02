@@ -19,6 +19,8 @@ import trung.dto.WordDTO;
 public class WordList extends ArrayList<WordDTO> {
 
     public void loadAllWord() {
+        this.clear();
+        
         WordDAO dao = new WordDAO();
         ArrayList<WordDTO> list = dao.getAllWord();
 

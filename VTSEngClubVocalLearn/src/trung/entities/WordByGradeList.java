@@ -16,6 +16,8 @@ import trung.dto.WordByGradeDTO;
  */
 public class WordByGradeList extends ArrayList<WordByGradeDTO> {
     public void loadAllWordByGrade() {
+        this.clear();
+        
         WordByGradeDAO dao = new WordByGradeDAO();
         ArrayList<WordByGradeDTO> list = dao.getAllWordByGrade();
         for (WordByGradeDTO dto : list) {

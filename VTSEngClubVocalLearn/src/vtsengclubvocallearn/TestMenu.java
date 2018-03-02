@@ -12,6 +12,7 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import trung.dao.GradeDAO;
 import trung.dao.UnitDAO;
 import trung.dao.WordDAO;
@@ -31,8 +32,9 @@ public class TestMenu extends javax.swing.JFrame {
 
     ArrayList<WordDTO> words = new ArrayList<>();
     ArrayList<UnitDTO> units = new ArrayList<>();
-    public ArrayList<WordDTO> selectedWord = new ArrayList<>();
     ArrayList<JCheckBox> checkBoxGroup = new ArrayList<>();
+    
+    public static ArrayList<WordDTO> selectedWords = new ArrayList<>();
 
     VTSEngClubVocalLearn main;
 
@@ -73,13 +75,15 @@ public class TestMenu extends javax.swing.JFrame {
             cbGrades.addItem("Grade: " + dto.getNumber());
         }
     }
-    
+
     //get selected words
     public void getSelectedWords() {
+        selectedWords.clear();
+        
         for (int i = 0; i < jpWord.getComponentCount(); i++) {
             JCheckBox cb = (JCheckBox) jpWord.getComponent(i);
             if (cb.isSelected()) {
-                selectedWord.add(words.get(i));
+                selectedWords.add(words.get(i));
             }
         }
     }
@@ -87,11 +91,11 @@ public class TestMenu extends javax.swing.JFrame {
     //Load word checkbox
     public void loadWordCheckBox(int seq) {
         words = VTSEngClubVocalLearn.WORD_LIST.getWordsByUnitSEQ(seq, VTSEngClubVocalLearn.WBG_LIST);
-        
+
         jpWord.setLayout(new GridLayout(words.size(), 1));
-        
+
         checkBoxGroup.clear();
-        
+
         for (WordDTO dto : words) {
             JCheckBox cb = new JCheckBox(dto.getName());
             checkBoxGroup.add(cb);
@@ -189,11 +193,19 @@ public class TestMenu extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        this.setEnabled(false);
+
+        getSelectedWords();
         
-        
-        Test test = new Test();
-        test.setVisible(true);
+        if (selectedWords.size() > 3) {
+
+            this.setEnabled(false);
+
+            Test test = new Test(); 
+            test.setParent(this);
+            test.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "At least 4 words");
+        }        
     }//GEN-LAST:event_btnStartActionPerformed
 
     /**

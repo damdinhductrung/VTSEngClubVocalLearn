@@ -18,6 +18,8 @@ import trung.dto.GradeDTO;
 public final class GradeList extends ArrayList<GradeDTO> {    
     
     public void loadGradeList() {
+        this.clear();
+        
         GradeDAO dao = new GradeDAO();
         ArrayList<GradeDTO> list = dao.getAllGrade();
         for (GradeDTO dto : list) {

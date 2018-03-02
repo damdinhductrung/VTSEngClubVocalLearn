@@ -26,12 +26,12 @@ public final class VTSEngClubVocalLearn {
     
     public static void main(String[] args) {
         loadData();
-        
-        TestMenu testMenu = new TestMenu();
-        testMenu.setVisible(true);
+//        
+//        TestMenu testMenu = new TestMenu();
+//        testMenu.setVisible(true);
 
-//        Dictionary dic = new Dictionary();
-//        dic.setVisible(true);
+        Dictionary dic = new Dictionary();
+        dic.setVisible(true);
     }
     
     public static void loadData() {

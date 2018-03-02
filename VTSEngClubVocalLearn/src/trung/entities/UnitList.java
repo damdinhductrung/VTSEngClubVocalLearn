@@ -17,6 +17,8 @@ import trung.dto.UnitDTO;
  */
 public class UnitList extends ArrayList<UnitDTO> {
     public void loadAllUnit() {
+        this.clear();
+        
         UnitDAO dao = new UnitDAO();
         ArrayList<UnitDTO> list = dao.getAllUnit();
         for (UnitDTO dto : list) {
